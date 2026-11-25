@@ -196,8 +196,8 @@ function doPost(e) {
   if (!lock.tryLock(20000)) return out_({ ok: false, err: 'busy' });
   try {
     switch (b.a) {
-      case 'tick': return out_(tick_(b));
-      case 'nota': return out_(nota_(b));
+      case 'tick': requirePin_(b.pin); return out_(tick_(b));
+      case 'nota': requirePin_(b.pin); return out_(nota_(b));
       case 'pin': return out_({ ok: checkPin_(b.pin) });
       case 'savePetugas': requirePin_(b.pin); return out_(savePetugas_(b.p));
       case 'delPetugas': requirePin_(b.pin); return out_(delPetugas_(b.id));

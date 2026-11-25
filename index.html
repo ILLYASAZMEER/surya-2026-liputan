@@ -325,10 +325,10 @@ footer ul{margin:6px 0 0;padding-left:20px}
    <summary>Cara guna</summary>
    <ul>
     <li>Pilih hari di bar atas dan pilih sukan — venue setiap sukan tertera di bawah namanya.</li>
-    <li>Pilih "Nama saya" sekali sahaja pada telefon anda, supaya setiap tanda dan nota direkodkan dengan nama anda.</li>
-    <li>Pada setiap slot, tekan butang status dan tandakan: (1) gambar telah dimuat naik di Drive, (2) publisiti telah dilaksanakan, dan tulis (3) nota jika perlu. Semua ahli pasukan nampak status yang sama, dan paparan dikemas kini sendiri setiap 20 saat.</li>
+    <li>Tekan butang status pada setiap slot untuk melihat: (1) gambar telah dimuat naik di Drive, (2) publisiti telah dilaksanakan, dan (3) nota. Paparan dikemas kini sendiri setiap 20 saat.</li>
+    <li>Status dan nota dikemas kini oleh admin sahaja (perlu PIN). Dalam mod admin, pilih "Nama saya" sekali supaya setiap tanda direkodkan dengan nama.</li>
     <li>Tab Dashboard menunjukkan kemajuan ikut hari, ikut sukan dan ikut petugas.</li>
-    <li>Admin tekan "Mod admin" di tab Petugas dan masukkan PIN, kemudian isi nama, telefon dan gambar petugas serta tetapkan petugas melalui butang "Tetapkan" pada setiap slot.</li>
+    <li>Admin tekan "Mod admin" di tab Petugas dan masukkan PIN, kemudian tanda status, isi nama, telefon dan gambar petugas, serta tetapkan petugas melalui butang "Tetapkan" pada setiap slot.</li>
     <li>Semua status dan senarai petugas disimpan dalam Google Sheet pasukan (SURYA 2026 – Data Website Liputan).</li>
    </ul>
   </details>
@@ -374,7 +374,7 @@ footer ul{margin:6px 0 0;padding-left:20px}
 
 <dialog id="dPin"><form id="fPin">
  <h2>Mod admin</h2>
- <p class="note" id="fPinNote">Masukkan PIN admin untuk mengisi petugas dan menetapkan tugasan.</p>
+ <p class="note" id="fPinNote">Masukkan PIN admin.</p>
  <label>PIN admin<input id="fPinIn" type="password" inputmode="numeric" maxlength="12" autocomplete="off"></label>
  <p class="err" id="fPinErr"></p>
  <div class="dacts"><button type="button" class="ghost danger sp-l" id="fPinOut" hidden>Keluar mod admin</button><button type="button" class="ghost" data-close>Batal</button><button type="submit" class="pri" id="fPinGo">Masuk</button></div>
@@ -531,6 +531,7 @@ function renderCrewFilter() {
   sel.disabled = !ids.length;
   $('#pcount').textContent = ids.length ? '(' + ids.length + ')' : '';
   $('#meName').textContent = me || 'belum dipilih';
+  $('#meBtn').hidden = !isAdmin;
 }
 
 /* ---------- schedule ---------- */
@@ -553,15 +554,15 @@ ${isOpen ? ckHtml(e, it, nota) : ''}
 </article>`;
 }
 function ckHtml(e, it, nota) {
-  const ro = dbState !== 'ok';
+  const ro = dbState !== 'ok' || !isAdmin;
   const dis = ro ? ' disabled' : '';
-  const msg = dbState === 'wait' ? 'Memuatkan status pasukan…' : dbState === 'err' ? 'Tidak dapat menghubungi pangkalan data. Semak sambungan internet dan cuba lagi.' : (!me ? 'Pilih "Nama saya" dahulu supaya tanda anda direkodkan dengan nama.' : '');
+  const msg = dbState === 'wait' ? 'Memuatkan status pasukan…' : dbState === 'err' ? 'Tidak dapat menghubungi pangkalan data. Semak sambungan internet dan cuba lagi.' : !isAdmin ? 'Status dikemas kini oleh admin sahaja.' : (!me ? 'Pilih "Nama saya" dahulu supaya tanda anda direkodkan dengan nama.' : '');
   const txt = drafts[e.id] ?? (nota ? nota.t : '');
   return `<div class="ck">${msg ? `<p class="note">${msg}</p>` : ''}<ul>${ITEMS.map(([k, l], i) => {
     const v = it[k];
     return `<li><label><input type="checkbox" data-k="${k}"${v ? ' checked' : ''}${dis}><i>${i + 1}</i><span>${esc(l)}</span></label>${v ? `<small>✓ ${esc(v.by || 'Ahli pasukan')}${v.at ? ' · ' + esc(v.at) : ''}</small>` : ''}</li>`;
   }).join('')}</ul>
-<label class="nota"><span><i>3</i>Nota</span><textarea data-note maxlength="2000" placeholder="Contoh: link folder Drive, keputusan perlawanan, nama VIP, isu di lapangan"${ro ? ' readonly' : ''}>${esc(txt)}</textarea><small data-nstat>${nota && nota.at ? 'Dikemas kini oleh ' + esc(nota.by || 'ahli pasukan') + ' · ' + esc(nota.at) : ''}</small></label></div>`;
+<label class="nota"><span><i>3</i>Nota</span><textarea data-note maxlength="2000" placeholder="${ro ? 'Tiada nota' : 'Contoh: link folder Drive, keputusan perlawanan, nama VIP, isu di lapangan'}"${ro ? ' readonly' : ''}>${esc(txt)}</textarea><small data-nstat>${nota && nota.at ? 'Dikemas kini oleh ' + esc(nota.by || 'ahli pasukan') + ' · ' + esc(nota.at) : ''}</small></label></div>`;
 }
 function keepFocus(fn) {
   const a = document.activeElement, ta = a && a.matches && a.matches('textarea[data-note]') ? a : null;
@@ -683,6 +684,7 @@ function failMsg(err) {
 let pendingAfter = null;
 function askMe(then) { pendingAfter = then || null; openMe(); }
 function toggleItem(eid, k, on) {
+  if (!isAdmin) { refreshCard(eid); return; }
   if (!me) { askMe(() => toggleItem(eid, k, on)); refreshCard(eid); return; }
   const e = EV.find(x => x.id === eid);
   const before = itemsOf(eid)[k] || null;
@@ -690,7 +692,7 @@ function toggleItem(eid, k, on) {
   const cur = Object.assign({}, C[eid] || {}); cur.items = Object.assign({}, itemsOf(eid)); cur.items[k] = val; C[eid] = cur;
   refreshCard(eid);
   pending++;
-  api({a: 'tick', slot: eid, key: k, on, by: me, label: label(e)})
+  api({a: 'tick', pin, slot: eid, key: k, on, by: me, label: label(e)})
     .then(() => { pending--; rev = ''; pull(); })
     .catch(err => { pending--; const c2 = Object.assign({}, C[eid]); c2.items = Object.assign({}, c2.items); c2.items[k] = before; C[eid] = c2; refreshCard(eid); toast(failMsg(err)); });
 }
@@ -701,11 +703,12 @@ function queueNote(eid, immediate) {
     const txt = drafts[eid]; if (txt === undefined) return;
     const prevN = notaOf(eid);
     if ((prevN ? prevN.t : '') === txt) { delete drafts[eid]; return; }
+    if (!isAdmin) { delete drafts[eid]; return; }
     if (!me) { askMe(() => queueNote(eid, true)); return; }
     const e = EV.find(x => x.id === eid);
     const stat = document.querySelector(`.ev[data-id="${eid}"] [data-nstat]`); if (stat) stat.textContent = 'Menyimpan…';
     pending++;
-    api({a: 'nota', slot: eid, t: txt, by: me, label: label(e)}).then(() => {
+    api({a: 'nota', pin, slot: eid, t: txt, by: me, label: label(e)}).then(() => {
       pending--;
       const cur = Object.assign({}, C[eid] || {items: {}}); cur.nota = txt ? {t: txt, by: me, at: nowStr()} : null; C[eid] = cur;
       if (drafts[eid] === txt) delete drafts[eid];
@@ -737,7 +740,7 @@ function saveMe(ev) {
 function openPin() {
   $('#fPinIn').value = ''; $('#fPinErr').textContent = '';
   $('#fPinOut').hidden = !isAdmin; $('#fPinGo').hidden = isAdmin; $('#fPinIn').closest('label').hidden = isAdmin;
-  $('#fPinNote').textContent = isAdmin ? 'Mod admin aktif pada peranti ini.' : 'Masukkan PIN admin untuk mengisi petugas dan menetapkan tugasan.';
+  $('#fPinNote').textContent = isAdmin ? 'Mod admin aktif pada peranti ini.' : 'Masukkan PIN admin untuk menanda status liputan, menulis nota, mengisi petugas dan menetapkan tugasan.';
   $('#dPin').showModal();
 }
 async function savePin(ev) {
@@ -868,11 +871,11 @@ $('#list').addEventListener('click', ev => {
   } else if (b.dataset.act === 'assign') openA(id);
 });
 $('#list').addEventListener('change', ev => {
-  const i = ev.target.closest('input[data-k]'); if (!i || dbState !== 'ok') return;
+  const i = ev.target.closest('input[data-k]'); if (!i || dbState !== 'ok' || !isAdmin) return;
   toggleItem(i.closest('.ev').dataset.id, i.dataset.k, i.checked);
 });
 $('#list').addEventListener('input', ev => {
-  const t = ev.target.closest('textarea[data-note]'); if (!t || dbState !== 'ok') return;
+  const t = ev.target.closest('textarea[data-note]'); if (!t || dbState !== 'ok' || !isAdmin) return;
   const id = t.closest('.ev').dataset.id; drafts[id] = t.value; queueNote(id, false);
 });
 $('#list').addEventListener('focusout', ev => {
