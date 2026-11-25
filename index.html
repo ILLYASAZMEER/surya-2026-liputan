@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jadual Liputan SURYA 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Unbounded:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a field-desk tool for the photo team — brisk, sporty, readable at a glance on a phone
+   IDEA: the SURYA wordmark's colour ramp becomes a five-leg relay; each day carries one colour of it
+   PICTURE: the schedule itself — large hanging times, sport-tagged cards with a shared coverage status
+   COLOUR+TYPE: white ground, logo-maroon ink, days maroon→red→orange→green→blue; Unbounded + Figtree
+   LAYOUT: logo + title band, sticky tabs + day relay, sport chips, timeline; dashboards; crew grid */
+:root{color-scheme:light dark;
+ --bg:light-dark(#ffffff,#140b0d);--ink:light-dark(#241418,#f6eeec);--mut:light-dark(#6c5c60,#bcaaad);
+ --line:light-dark(#ebe1df,#36272b);--soft:light-dark(#faf5f3,#1c1215);--card:light-dark(#ffffff,#1b1114);
+ --mar:light-dark(#7a1520,#ff9b8f);--ok:light-dark(#2f7d32,#7cc97f);
+ --d1:#7b1b22;--d2:#d0352a;--d3:#ef8b12;--d4:#4c983a;--d5:#1f6fb5;
+ --c-crew:light-dark(#1f6fb5,#6aa9e6);--c-drive:light-dark(#2f7d32,#7cc97f);--c-pub:light-dark(#d9770c,#f3a24a);
+ --ramp:linear-gradient(90deg,var(--d1),var(--d2) 24%,var(--d3) 46%,#f2b71c 57%,var(--d4) 76%,var(--d5));
+ --hf:'Unbounded',system-ui,sans-serif;--bf:'Figtree',system-ui,sans-serif}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--bf);overflow-x:clip}
+html{scroll-padding-top:150px}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--d5);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto}
+.band{padding:clamp(20px,3.5vw,44px) max(5vw,16px)}
+/* header */
+.top{background:var(--soft);position:relative;padding-bottom:calc(clamp(20px,3.5vw,44px) + 6px)}
+.top::after{content:"";position:absolute;inset:auto 0 0 0;height:6px;background:var(--ramp)}
+.hd{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(18px,3.5vw,44px);align-items:center}
+.logo-w{border-radius:22px;padding:4px;background:light-dark(transparent,#fbf6f4)}
+.logo{display:block;height:clamp(150px,21vw,224px);width:auto}
+.kick{margin:0 0 8px;font-weight:600;color:var(--mar);font-size:15px}
+h1{font:700 clamp(27px,4.3vw,48px)/1.05 var(--hf);margin:0 0 10px;text-wrap:balance;letter-spacing:-.01em}
+.sub{margin:0;color:var(--mut)}
+.now{margin-top:20px}
+.stats{display:flex;flex-wrap:wrap;gap:12px 32px}
+.stat b{display:block;font:700 clamp(26px,3.3vw,38px)/1.05 var(--hf);font-variant-numeric:tabular-nums}
+.stat span{font-size:14px;color:var(--mut)}
+.livebox{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px 24px}
+.livebox h4{margin:0 0 4px;font-size:14px;font-weight:600;color:var(--mut);display:flex;align-items:center;gap:8px}
+.pulse{width:10px;height:10px;border-radius:50%;background:var(--d2);box-shadow:0 0 0 0 color-mix(in srgb,var(--d2) 60%,transparent);animation:pu 1.8s infinite}
+@keyframes pu{70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}
+@media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+.livebox ul{list-style:none;margin:0;padding:0}
+.livebox li{padding:3px 0;font-size:15px}
+.livebox li b{font-variant-numeric:tabular-nums;margin-right:6px}
+.lv{color:var(--mut)}
+/* sticky bar */
+.bar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 93%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;gap:10px 18px;padding:10px max(5vw,16px);flex-wrap:wrap}
+.tabs{display:flex;gap:4px;background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:4px}
+.tabs a{display:flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:10px;text-decoration:none;color:var(--ink);font-weight:600}
+.tabs a[aria-current=page]{background:var(--ink);color:var(--bg)}
+.tabs a small{font-weight:500;opacity:.7}
+.days{display:flex;gap:6px;overflow-x:auto;padding:2px;scrollbar-width:none;flex:1 1 420px}
+.day{--c:var(--d1);flex:none;min-height:48px;padding:4px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);cursor:pointer;display:flex;align-items:center;gap:8px;text-align:left}
+.day::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.day b{font:700 17px/1 var(--hf)}.day span{font-size:13px;line-height:1.15;color:var(--mut)}
+.day[aria-pressed=true]{background:var(--c);border-color:var(--c);color:#fff}
+.day[aria-pressed=true] span{color:inherit;opacity:.9}.day[aria-pressed=true]::before{background:#fff}
+.day.d3[aria-pressed=true]{color:#2a1500}.day.d3[aria-pressed=true]::before{background:#2a1500}
+.day.all{--c:var(--ink)}.day.all[aria-pressed=true]{color:var(--bg)}.day.all[aria-pressed=true]::before{background:var(--bg)}
+/* sport chips */
+.sports{display:flex;flex-wrap:wrap;gap:8px}
+.sch{--sc:var(--ink);display:flex;align-items:center;gap:8px;min-height:62px;padding:4px 14px 4px 6px;border-radius:14px;border:1px solid var(--line);background:var(--card);cursor:pointer;text-align:left;max-width:100%}
+.sch>span:last-child{display:flex;flex-direction:column;gap:1px}
+.mpair{display:flex;align-items:flex-end;flex:none}
+.mpair img{height:52px;width:auto;display:block}
+.mpair img+img{margin-left:-14px}
+.sch b{display:flex;align-items:center;gap:7px;font-size:15px}
+.sch b::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--sc);flex:none}
+.sch small{font-size:12.5px;color:var(--mut);line-height:1.3;padding-left:16px}
+.sch[aria-pressed=true]{background:color-mix(in srgb,var(--sc) 14%,var(--card));border-color:var(--sc);box-shadow:inset 0 0 0 1px var(--sc)}
+/* filters */
+.filters{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:end;margin-top:14px}
+.filters label{display:grid;gap:4px;font-size:13px;font-weight:600;color:var(--mut);flex:0 1 300px}
+select,input[type=text],input[type=tel],input:not([type]){min-height:44px;font-size:16px;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:0 12px;width:100%}
+.tog{display:flex!important;align-items:center;gap:8px;min-height:44px;font-size:15px!important;color:var(--ink)!important;font-weight:500!important;cursor:pointer;flex:0 0 auto!important}
+.tog input,.ck input,.plist input,.chk input{width:20px;height:20px;accent-color:var(--d4);flex:none}
+.filters #copyBtn{margin-left:auto}
+.btn.me b{font-weight:700;color:var(--mar)}
+.counts{margin:16px 0 6px;color:var(--mut);font-size:15px}
+.btn,.ghost,.pri,.lnk{min-height:44px;border-radius:12px;padding:0 16px;cursor:pointer;font-weight:600;border:1px solid var(--line);background:var(--card)}
+.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.danger{color:var(--d2)}
+.lnk{min-height:36px;padding:0 12px;border-radius:999px;font-size:14px;border-style:dashed}
+.notice{border:1px solid var(--line);background:var(--soft);border-radius:12px;padding:10px 14px;font-size:15px;margin-top:14px}
+.notice:empty{display:none}
+/* timeline */
+.dayh{display:flex;align-items:center;gap:10px;font:700 20px/1.2 var(--hf);margin:30px 0 8px}
+.dayh::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--dc)}
+.slot{display:grid;grid-template-columns:86px minmax(0,1fr);gap:14px;padding:14px 0;border-top:1px solid var(--line)}
+.time b{display:block;font:600 22px/1.1 var(--hf);font-variant-numeric:tabular-nums;position:sticky;top:92px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:12px;align-items:start}
+.ev{--sc:#888;border:1px solid var(--line);border-radius:16px;background:var(--card);padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.ev.prep{background:var(--soft);border-style:dashed}
+.ev.final,.ev.award,.ev.majlis{border-color:color-mix(in srgb,#d9a11a 75%,var(--line));box-shadow:0 1px 0 color-mix(in srgb,#d9a11a 40%,transparent)}
+.r1{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:13px}
+.sp{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-weight:700;background:color-mix(in srgb,var(--sc) 15%,transparent);color:var(--ink)}
+.sp::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--sc)}
+.fin{padding:2px 9px;border-radius:999px;background:var(--mar);color:var(--bg);font-weight:700;font-size:12px}
+.tt{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--mut);font-weight:600}
+.eh{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:start}
+.eh>div{display:flex;flex-direction:column;gap:4px}
+.mas{height:84px;width:auto;margin:-6px -6px -10px 0;display:block}
+.venue{margin:2px 0 0;font-size:14px;font-weight:600;color:var(--ink);display:flex;gap:6px;align-items:baseline}
+.venue::before{content:"";width:8px;height:8px;flex:none;border:2px solid var(--sc);border-radius:50% 50% 50% 0;transform:rotate(-45deg) translateY(1px)}
+.ev h3{margin:4px 0 0;font-size:18px;line-height:1.3;font-weight:700}
+.meta{margin:0;color:var(--mut);font-size:14px}
+.ms{list-style:none;margin:4px 0 0;padding:0;border-top:1px solid var(--line)}
+.ms li{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr);gap:2px 10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
+.ms li span{color:var(--mut)}.ms li i{grid-column:2;font-style:normal;color:var(--mut);font-size:13px}
+.ft{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
+.crew{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.none{font-size:14px;color:var(--mut)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 3px;border-radius:999px;background:var(--soft);border:1px solid var(--line);font-size:14px;font-weight:600}
+.av{border-radius:50%;object-fit:cover;flex:none;background:var(--line)}
+.ini{display:inline-grid;place-items:center;font-size:11px;font-weight:700;color:#fff;background:#7a1520}
+.ckb{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--soft);cursor:pointer;font-size:14px;font-weight:600}
+.ckb .st{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:12.5px;color:var(--mut)}
+.ckb .st::before{content:"";width:8px;height:8px;border-radius:50%;border:1.5px solid currentColor}
+.ckb .st.on{color:var(--ink);border-color:var(--sc2)}.ckb .st.on::before{background:var(--sc2);border-color:var(--sc2)}
+.ckb .st.dr{--sc2:var(--c-drive)}.ckb .st.pb{--sc2:var(--c-pub)}
+.ckb .nt{font-size:12.5px;color:var(--mut);font-weight:600}
+.ck{border-top:1px solid var(--line);margin-top:6px;padding-top:4px}
+.ck ul{list-style:none;margin:0;padding:0}
+.ck li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0 10px;border-bottom:1px solid var(--line)}
+.ck label{display:flex;align-items:center;gap:10px;min-height:46px;cursor:pointer;flex:1 1 220px;font-size:15px;font-weight:600}
+.ck label i{font-style:normal;font-family:var(--hf);font-size:12px;width:22px;height:22px;display:inline-grid;place-items:center;border-radius:50%;background:var(--soft);border:1px solid var(--line);flex:none}
+.ck small{color:var(--ok);font-size:13px;font-weight:600;padding-bottom:6px}
+.ck label.nota{display:grid;gap:6px;padding:10px 0 2px;min-height:0;cursor:auto;font-weight:400}
+.nota span{font-size:15px;font-weight:600;display:flex;align-items:center;gap:10px}
+.nota span i{font-style:normal;font-family:var(--hf);font-size:12px;width:22px;height:22px;display:inline-grid;place-items:center;border-radius:50%;background:var(--soft);border:1px solid var(--line)}
+.nota textarea{min-height:84px;resize:vertical;width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--soft);font-size:16px;line-height:1.45}
+.nota small{font-size:13px;color:var(--mut)}
+.note{margin:4px 0;font-size:14px;color:var(--mut)}
+.empty-list{padding:40px 0;color:var(--mut);text-align:center}
+/* dashboard */
+.dh{font:700 clamp(22px,3vw,32px)/1.15 var(--hf);margin:0 0 6px;text-wrap:balance}
+.dsub{margin:0 0 18px;color:var(--mut)}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tile{border:1px solid var(--line);border-radius:16px;padding:14px 16px;background:var(--card);display:grid;gap:6px}
+.tile span{font-size:14px;color:var(--mut);font-weight:600}
+.tile b{font:700 clamp(24px,3vw,34px)/1 var(--hf);font-variant-numeric:tabular-nums}
+.tile b small{font:600 15px var(--bf);color:var(--mut);margin-left:4px}
+.meter{height:8px;border-radius:4px;background:linear-gradient(var(--bc),var(--bc)) 0 0/var(--p) 100% no-repeat,var(--line)}
+.dsec{margin-top:34px}
+.dsec h3{font:700 19px/1.2 var(--hf);margin:0 0 4px}
+.dsec>p{margin:0 0 14px;color:var(--mut);font-size:15px}
+.dayrows{display:grid;gap:2px}
+.dr{display:grid;grid-template-columns:9em minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:8px 18px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.dr.hdr{font-size:13px;color:var(--mut);font-weight:600;padding:4px 0}
+.dr .dn{display:flex;align-items:center;gap:8px;font-weight:700}
+.dr .dn::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--dc)}
+.dr .m{display:grid;gap:4px}.dr .m b{font-variant-numeric:tabular-nums;font-weight:600}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:12px}
+.dc{--sc:var(--ink);border:1px solid var(--line);border-radius:16px;padding:16px;background:var(--card);display:flex;flex-direction:column;gap:10px}
+.dc .hdr{display:flex;align-items:center;gap:12px}
+.dc .hdr.sp-h{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center}
+.dc .mpair img{height:104px}
+.dc .mpair img+img{margin-left:-26px}
+.dc h4{margin:0;font-size:17px;line-height:1.25}
+.dc .vn{margin:2px 0 0;font-size:13px;color:var(--mut)}
+.dc .big{display:flex;align-items:baseline;gap:8px}
+.dc .big b{font:700 28px/1 var(--hf);font-variant-numeric:tabular-nums}
+.dc .big span{color:var(--mut);font-size:14px}
+.br{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 10px;font-size:14px}
+.br b{font-variant-numeric:tabular-nums;font-weight:600}
+.br .meter{grid-column:1/-1}
+.dc .foot{margin-top:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;font-size:13px;color:var(--mut)}
+.dc .foot button{min-height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--soft);font-weight:600;font-size:14px;cursor:pointer}
+.dchips{display:flex;flex-wrap:wrap;gap:4px}
+.dchips span{font-size:12.5px;padding:2px 8px;border-radius:999px;background:var(--soft);border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--sc);flex:none}
+/* crew */
+.ph{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px;margin-bottom:18px}
+.ph h2{font:700 clamp(22px,3vw,30px)/1.1 var(--hf);margin:0 0 6px}
+.ph p{margin:0;color:var(--mut);max-width:62ch}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:14px}
+.pc{border:1px solid var(--line);border-radius:18px;padding:18px;background:var(--card);display:flex;flex-direction:column;gap:8px}
+.pc .who{display:flex;gap:14px;align-items:center}
+.pc h3{margin:0;font-size:17px;line-height:1.25}
+.role{font-size:13px;font-weight:600;color:var(--mar)}
+.pc .tel{font-variant-numeric:tabular-nums;font-size:15px;margin:0}
+.pc .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:6px}
+.pc .acts a,.pc .acts button{min-height:40px;display:inline-flex;align-items:center;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--soft);font-size:14px;font-weight:600;text-decoration:none;color:var(--ink);cursor:pointer}
+.pc.empty{border-style:dashed;background:var(--soft);align-items:center;justify-content:center;text-align:center;min-height:200px;color:var(--mut)}
+.sil{width:64px;height:64px;border-radius:50%;border:2px dashed var(--line)}
+/* dialogs */
+dialog{border:1px solid var(--line);border-radius:20px;padding:0;background:var(--card);color:var(--ink);width:min(520px,calc(100vw - 24px));max-height:calc(100dvh - 24px)}
+dialog::backdrop{background:rgb(20 8 10/.55)}
+dialog form{padding:22px;display:grid;gap:14px}
+dialog h2{margin:0;font:700 20px/1.2 var(--hf)}
+dialog label{display:grid;gap:4px;font-size:14px;font-weight:600}
+.upl{display:flex;align-items:center;gap:14px}
+.dacts{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.dacts .sp-l{margin-right:auto}
+.err{margin:0;color:var(--d2);font-size:14px}.err:empty{display:none}
+.plist{display:grid;gap:4px;max-height:46dvh;overflow:auto}
+.plist label,.chk{display:flex!important;align-items:center;gap:10px;min-height:48px;padding:4px 8px;border-radius:12px;border:1px solid var(--line);font-weight:500!important;cursor:pointer}
+#fCtext{width:100%;min-height:240px;font:14px/1.5 var(--bf);border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--soft);color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:12px;font-weight:600;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+footer{border-top:1px solid var(--line);color:var(--mut);font-size:15px}
+footer details{margin-top:10px}footer summary{cursor:pointer;font-weight:600;color:var(--ink);min-height:44px;display:flex;align-items:center}
+footer ul{margin:6px 0 0;padding-left:20px}
+@media (max-width:900px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){
+ .hd{grid-template-columns:92px minmax(0,1fr);gap:14px;align-items:start}
+ .logo{height:auto;width:100%}
+ .slot{grid-template-columns:54px minmax(0,1fr);gap:10px}
+ .time b{font-size:16px;position:static}
+ .sports{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+ .sch{flex:none;max-width:240px}
+ .filters label{flex:1 1 100%}
+ .filters .btn{margin-left:0!important;width:100%}
+ .ms li{grid-template-columns:minmax(0,1fr)}.ms li i{grid-column:1}
+ .ev{padding:12px 14px}
+ .mas{height:70px}
+ .mpair img{height:46px}
+ .dr{grid-template-columns:minmax(0,1fr) minmax(0,1fr);row-gap:6px}.dr .dn{grid-column:1/-1}.dr.hdr{display:none}
+ .dr .m::before{content:attr(data-l);font-size:12px;color:var(--mut)}
+ html{scroll-padding-top:200px}
+ .tabs a{padding:0 10px}
+ .bar .wrap{padding-block:8px}
+ .lv{display:none}
+}
+</style>
+</head>
+<body>
+<header class="top band">
+ <div class="wrap hd">
+  <div class="logo-w"><img class="logo" src="surya-logo.webp" alt="Logo SURYA 2026 — Sukan JKR Se-Malaysia, Sarawak"></div>
+  <div>
+   <p class="kick">Pasukan Coverage · Media Sosial JKR Sarawak</p>
+   <h1>Jadual Liputan SURYA 2026</h1>
+   <p class="sub">10 sukan dan 2 majlis rasmi · 1–5 Disember 2026 · Kuching &amp; Kota Samarahan</p>
+   <div class="now" id="now" aria-live="polite"></div>
+  </div>
+ </div>
+</header>
+
+<nav class="bar" aria-label="Navigasi">
+ <div class="wrap">
+  <div class="tabs">
+   <a href="#jadual" id="t-jadual">Jadual</a>
+   <a href="#dashboard" id="t-dashboard">Dashboard</a>
+   <a href="#petugas" id="t-petugas">Petugas <small id="pcount"></small></a>
+  </div>
+  <div class="days" id="days" role="group" aria-label="Pilih hari"></div>
+ </div>
+</nav>
+
+<main>
+ <section id="v-jadual" class="band" style="padding-top:20px">
+  <div class="wrap">
+   <div class="sports" id="sports" role="group" aria-label="Pilih sukan"></div>
+   <div class="filters">
+    <label>Petugas<select id="fCrew"><option value="">Semua petugas</option></select></label>
+    <label class="tog"><input type="checkbox" id="fPrep"> Sembunyikan sesi persediaan</label>
+    <button class="btn me" id="meBtn" type="button">Nama saya: <b id="meName">belum dipilih</b></button>
+    <button class="btn" id="copyBtn" type="button">Salin ringkasan untuk WhatsApp</button>
+   </div>
+   <div class="notice" id="notice"></div>
+   <p class="counts" id="count"></p>
+   <div id="list"></div>
+  </div>
+ </section>
+
+ <section id="v-dashboard" class="band" style="padding-top:24px" hidden>
+  <div class="wrap">
+   <h2 class="dh" id="dTitle"></h2>
+   <p class="dsub" id="dSub"></p>
+   <div class="tiles" id="dTiles"></div>
+   <div class="notice" id="dNotice"></div>
+   <div class="dsec" id="dDays"></div>
+   <div class="dsec">
+    <h3>Ikut sukan</h3>
+    <p>Kemajuan liputan setiap sukan. Tekan "Lihat jadual" untuk terus ke slot sukan itu.</p>
+    <div class="dgrid" id="dSports"></div>
+   </div>
+   <div class="dsec">
+    <h3>Ikut petugas</h3>
+    <p>Beban tugas dan kemajuan setiap petugas berdasarkan slot yang ditetapkan kepada mereka.</p>
+    <div class="dgrid" id="dCrew"></div>
+   </div>
+  </div>
+ </section>
+
+ <section id="v-petugas" class="band" hidden>
+  <div class="wrap">
+   <div class="ph">
+    <div>
+     <h2>Petugas liputan</h2>
+     <p>Senarai pasukan Coverage yang bertugas sepanjang SURYA 2026. Tekan "Lihat tugasan" untuk menapis jadual mengikut petugas.</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="adminBtn" type="button">Mod admin</button><button class="pri" id="addP" type="button" hidden>Tambah petugas</button></div>
+   </div>
+   <div class="notice" id="pNotice"></div>
+   <div class="pgrid" id="pgrid" style="margin-top:14px"></div>
+  </div>
+ </section>
+</main>
+
+<footer class="band">
+ <div class="wrap">
+  <p style="margin:0">Sumber: <b>SURYA_2026_Master_Game_Calendar V4 (latest)</b> — tab per-sukan, dilengkapkan dengan tab Ringkasan Kejohanan. Dikemas kini 25 Nov 2026. Semua masa waktu Sarawak (GMT+8).</p>
+  <details>
+   <summary>Nota percanggahan dalam sumber</summary>
+   <ul>
+    <li>Separuh akhir Bola Tampar (M19–M20): diikut tab Bola Tampar dan Master Calendar — Khamis 3 Dis, 18:00–21:00. Tab Ringkasan meletakkannya pada Jumaat 4 Dis.</li>
+    <li>Grand Final E-Sport: diikut tab E-Sport dan Master Calendar — Jumaat 4 Dis, 17:30. Tab Ringkasan menulis 09:00–12:00.</li>
+    <li>Majlis Perasmian (Waterfront, 4 Dis 19:00) dan Majlis Penutupan (Wisma Melayu, 5 Dis 19:00) diikut tab Ringkasan. Master Calendar masih menulis DUN dan BCCK, 18:30.</li>
+    <li>Ping Pong M18 tertulis A1 vs A2, sama seperti M13 — perlu disahkan dengan urus setia.</li>
+   </ul>
+  </details>
+  <details>
+   <summary>Cara guna</summary>
+   <ul>
+    <li>Pilih hari di bar atas dan pilih sukan — venue setiap sukan tertera di bawah namanya.</li>
+    <li>Pilih "Nama saya" sekali sahaja pada telefon anda, supaya setiap tanda dan nota direkodkan dengan nama anda.</li>
+    <li>Pada setiap slot, tekan butang status dan tandakan: (1) gambar telah dimuat naik di Drive, (2) publisiti telah dilaksanakan, dan tulis (3) nota jika perlu. Semua ahli pasukan nampak status yang sama, dan paparan dikemas kini sendiri setiap 20 saat.</li>
+    <li>Tab Dashboard menunjukkan kemajuan ikut hari, ikut sukan dan ikut petugas.</li>
+    <li>Admin tekan "Mod admin" di tab Petugas dan masukkan PIN, kemudian isi nama, telefon dan gambar petugas serta tetapkan petugas melalui butang "Tetapkan" pada setiap slot.</li>
+    <li>Semua status dan senarai petugas disimpan dalam Google Sheet pasukan (SURYA 2026 – Data Website Liputan).</li>
+   </ul>
+  </details>
+ </div>
+</footer>
+
+<dialog id="dP"><form id="fP">
+ <h2 id="fPh">Tambah petugas</h2>
+ <div class="upl"><span id="fPprev"></span><label class="btn" style="display:inline-flex;align-items:center;font-weight:600">Pilih gambar<input type="file" id="fPfile" accept="image/*" hidden></label></div>
+ <label>Nama penuh<input id="fPnama" required maxlength="80" autocomplete="off"></label>
+ <label>No. telefon<input id="fPtel" type="tel" inputmode="tel" maxlength="20" placeholder="012-345 6789" autocomplete="off"></label>
+ <label>Peranan<select id="fProle">
+  <option>Jurugambar</option><option>Jurukamera video</option><option>Penulis berita</option><option>Operator drone</option><option>Media sosial / posting</option><option>Penyelaras liputan</option><option>Lain-lain</option>
+ </select></label>
+ <p class="err" id="fPerr"></p>
+ <div class="dacts"><button type="button" class="ghost danger sp-l" id="fPdel" hidden>Padam</button><button type="button" class="ghost" data-close>Batal</button><button type="submit" class="pri" id="fPsave">Simpan</button></div>
+</form></dialog>
+
+<dialog id="dA"><form id="fA">
+ <h2>Tetapkan petugas</h2>
+ <p class="note" id="fAwhat"></p>
+ <div class="plist" id="fAlist"></div>
+ <label class="chk"><input type="checkbox" id="fAall"><span id="fAallL"></span></label>
+ <p class="err" id="fAerr"></p>
+ <div class="dacts"><button type="button" class="ghost" data-close>Batal</button><button type="submit" class="pri" id="fAsave">Simpan</button></div>
+</form></dialog>
+
+<dialog id="dC"><form id="fC">
+ <h2>Ringkasan jadual</h2>
+ <p class="note">Salinan automatik tidak dibenarkan di sini. Pilih semua teks di bawah dan salin.</p>
+ <textarea id="fCtext" readonly></textarea>
+ <div class="dacts"><button type="button" class="pri" data-close>Tutup</button></div>
+</form></dialog>
+
+<dialog id="dMe"><form id="fMe">
+ <h2>Siapa anda?</h2>
+ <p class="note">Nama ini direkodkan setiap kali anda menanda status atau menulis nota. Disimpan pada peranti ini sahaja.</p>
+ <label>Pilih nama petugas<select id="fMeSel"></select></label>
+ <label>Atau tulis nama anda<input id="fMeTxt" maxlength="60" autocomplete="name" placeholder="Nama penuh"></label>
+ <p class="err" id="fMeErr"></p>
+ <div class="dacts"><button type="button" class="ghost" data-close>Batal</button><button type="submit" class="pri">Simpan</button></div>
+</form></dialog>
+
+<dialog id="dPin"><form id="fPin">
+ <h2>Mod admin</h2>
+ <p class="note" id="fPinNote">Masukkan PIN admin untuk mengisi petugas dan menetapkan tugasan.</p>
+ <label>PIN admin<input id="fPinIn" type="password" inputmode="numeric" maxlength="12" autocomplete="off"></label>
+ <p class="err" id="fPinErr"></p>
+ <div class="dacts"><button type="button" class="ghost danger sp-l" id="fPinOut" hidden>Keluar mod admin</button><button type="button" class="ghost" data-close>Batal</button><button type="submit" class="pri" id="fPinGo">Masuk</button></div>
+</form></dialog>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script id="data" type="application/json">{"venues":{"cascara":"Cascara Arena, Kuching","padang-unimas":"Padang A UNIMAS, Kota Samarahan","kawada":"Stadium Datuk Kawada, Kuching","stadium-samarahan":"Stadium Tertutup Kota Samarahan","dewan-badminton":"Dewan Badminton UNIMAS, Samarahan","extreme-tt":"Extreme Table Tennis Professional Centre, Jalan Petanak, Kuching","pavilion":"Student Pavilion, UNIMAS, Samarahan","megalanes":"Megalanes Sarawak, Batu Kawa, Kuching","picklepro":"PicklePro Reserve, Kuching","golf":"Samarahan Golf Club","centexs":"Dewan Serbaguna CENTEXS Santubong, Kuching","waterfront":"Waterfront, Kuching","wisma-melayu":"Wisma Melayu, Petra Jaya, Kuching"},"sports":{"bola-sepak":"Bola Sepak","bola-tampar":"Bola Tampar","bola-jaring":"Bola Jaring","badminton":"Badminton","ping-pong":"Ping Pong","dart":"Dart","tenpin":"Tenpin Bowling","pickleball":"Pickleball","golf":"Golf","esport":"E-Sport","majlis":"Majlis Rasmi"},"events":[{"d":1,"s":"bola-tampar","t0":"08:00","t1":"21:00","st":"Pengujian gelanggang","v":"kawada","ti":"Pengujian gelanggang","no":"","k":"prep","n":"","m":[],"id":"d1-bola-tampar-0800"},{"d":1,"s":"tenpin","t0":"09:00","t1":"18:00","st":"Latihan kumpulan","v":"megalanes","ti":"Latihan kumpulan","no":"","k":"prep","n":"","m":[],"id":"d1-tenpin-0900"},{"d":1,"s":"bola-sepak","t0":"17:00","t1":"22:00","st":"Pengujian gelanggang","v":"cascara","ti":"Pengujian gelanggang","no":"","k":"prep","n":"","m":[],"id":"d1-bola-sepak-1700"},{"d":2,"s":"badminton","t0":"08:00","t1":"16:00","st":"Pengujian gelanggang","v":"dewan-badminton","ti":"Pengujian gelanggang","no":"","k":"prep","n":"","m":[],"id":"d2-badminton-0800"},{"d":2,"s":"bola-sepak","t0":"08:00","t1":"09:20","st":"Peringkat kumpulan","v":"cascara","ti":"A1 vs A2","no":"M1","k":"match","n":"Kumpulan A","m":[],"id":"d2-bola-sepak-0800-m1"},{"d":2,"s":"ping-pong","t0":"08:00","t1":"16:00","st":"Pengujian gelanggang · Sesi 1–4","v":"extreme-tt","ti":"Pengujian gelanggang (T1–T8)","no":"","k":"prep","n":"","m":[["Sesi 1 · 08:00","Ibu Pejabat JKR, JKR Selangor, JKR KL/Putrajaya, Kader",""],["Sesi 2 · 10:00","JKR Kedah, JKR Kelantan, JKR Terengganu, JKR Perak",""],["Sesi 3 · 12:00","JKR Pahang, JKR Labuan, JKR Johor",""],["Sesi 4 · 14:00","JKR Melaka, JKR Sabah, JKR Sarawak",""]],"id":"d2-ping-pong-0800"},{"d":2,"s":"bola-jaring","t0":"08:30","t1":"12:00","st":"Pengujian gelanggang","v":"stadium-samarahan","ti":"Pengujian gelanggang","no":"","k":"prep","n":"","m":[],"id":"d2-bola-jaring-0830"},{"d":2,"s":"esport","t0":"09:00","t1":"16:00","st":"Persediaan","v":"centexs","ti":"Pengujian arena, taklimat akhir pasukan & persediaan teknikal","no":"","k":"prep","n":"","m":[],"id":"d2-esport-0900"},{"d":2,"s":"tenpin","t0":"09:00","t1":"18:00","st":"Latihan berkumpulan (test lane)","v":"megalanes","ti":"Ketibaan pasukan & sesi test lane","no":"","k":"prep","n":"","m":[],"id":"d2-tenpin-0900"},{"d":2,"s":"bola-sepak","t0":"09:30","t1":"11:00","st":"Peringkat kumpulan","v":"cascara","ti":"B1 vs B2","no":"M2","k":"match","n":"Kumpulan B","m":[],"id":"d2-bola-sepak-0930-m2"},{"d":2,"s":"dart","t0":"10:00","t1":"12:00","st":"Pengujian gelanggang · Sesi 1","v":"pavilion","ti":"Pengujian gelanggang sesi 1","no":"","k":"prep","n":"A1, A2 (Glg 1–4) & B1, B2 (Glg 5–8)","m":[],"id":"d2-dart-1000"},{"d":2,"s":"bola-tampar","t0":"13:00","t1":"14:00","st":"Peringkat kumpulan 1","v":"kawada","ti":"X1 vs X2","no":"M1","k":"match","n":"Kumpulan X","m":[],"id":"d2-bola-tampar-1300-m1"},{"d":2,"s":"bola-tampar","t0":"14:00","t1":"15:00","st":"Peringkat kumpulan 1","v":"kawada","ti":"X3 vs X4","no":"M2","k":"match","n":"Kumpulan X","m":[],"id":"d2-bola-tampar-1400-m2"},{"d":2,"s":"dart","t0":"14:00","t1":"16:00","st":"Pengujian gelanggang · Sesi 2","v":"pavilion","ti":"Pengujian gelanggang sesi 2","no":"","k":"prep","n":"A3, A4 (Glg 1–4) & B3, B4 (Glg 5–8)","m":[],"id":"d2-dart-1400"},{"d":2,"s":"bola-jaring","t0":"14:30","t1":"15:30","st":"Taklimat pengurus pasukan","v":"stadium-samarahan","ti":"Taklimat pengurus pasukan oleh SNA","no":"","k":"prep","n":"","m":[],"id":"d2-bola-jaring-1430"},{"d":2,"s":"golf","t0":"14:30","t1":"15:30","st":"Mesyuarat pengurus pasukan","v":"golf","ti":"Mesyuarat pengurus pasukan","no":"","k":"prep","n":"","m":[],"id":"d2-golf-1430"},{"d":2,"s":"bola-tampar","t0":"15:00","t1":"16:00","st":"Peringkat kumpulan 1","v":"kawada","ti":"Y1 vs Y2","no":"M3","k":"match","n":"Kumpulan Y","m":[],"id":"d2-bola-tampar-1500-m3"},{"d":2,"s":"bola-tampar","t0":"16:00","t1":"17:00","st":"Peringkat kumpulan 1","v":"kawada","ti":"Z1 vs Z2","no":"M4","k":"match","n":"Kumpulan Z","m":[],"id":"d2-bola-tampar-1600-m4"},{"d":2,"s":"ping-pong","t0":"16:00","t1":"18:00","st":"Taklimat & persediaan teknikal","v":"extreme-tt","ti":"Taklimat pengurus pasukan & persediaan teknikal","no":"","k":"prep","n":"","m":[],"id":"d2-ping-pong-1600"},{"d":2,"s":"tenpin","t0":"16:30","t1":"17:30","st":"Mesyuarat pengurus pasukan","v":"megalanes","ti":"Mesyuarat pengurus pasukan","no":"","k":"prep","n":"","m":[],"id":"d2-tenpin-1630"},{"d":2,"s":"bola-tampar","t0":"17:00","t1":"18:00","st":"Peringkat kumpulan 1","v":"kawada","ti":"X2 vs X3","no":"M5","k":"match","n":"Kumpulan X","m":[],"id":"d2-bola-tampar-1700-m5"},{"d":2,"s":"bola-tampar","t0":"18:00","t1":"19:00","st":"Peringkat kumpulan 1","v":"kawada","ti":"X1 vs X4","no":"M6","k":"match","n":"Kumpulan X","m":[],"id":"d2-bola-tampar-1800-m6"},{"d":2,"s":"bola-sepak","t0":"18:30","t1":"20:00","st":"Peringkat kumpulan","v":"cascara","ti":"A2 vs A3","no":"M3","k":"match","n":"Kumpulan A","m":[],"id":"d2-bola-sepak-1830-m3"},{"d":2,"s":"bola-tampar","t0":"19:00","t1":"20:00","st":"Peringkat kumpulan 1","v":"kawada","ti":"Y2 vs Y3","no":"M7","k":"match","n":"Kumpulan Y","m":[],"id":"d2-bola-tampar-1900-m7"},{"d":2,"s":"bola-tampar","t0":"20:00","t1":"21:00","st":"Peringkat kumpulan 1","v":"kawada","ti":"Z2 vs Z3","no":"M8","k":"match","n":"Kumpulan Z","m":[],"id":"d2-bola-tampar-2000-m8"},{"d":2,"s":"bola-sepak","t0":"20:30","t1":"22:00","st":"Peringkat kumpulan","v":"cascara","ti":"B2 vs B3","no":"M4","k":"match","n":"Kumpulan B","m":[],"id":"d2-bola-sepak-2030-m4"},{"d":3,"s":"golf","t0":"06:00","t1":"07:00","st":"Pendaftaran & taklimat","v":"golf","ti":"Pendaftaran, sarapan & taklimat pemain","no":"","k":"prep","n":"","m":[],"id":"d3-golf-0600"},{"d":3,"s":"golf","t0":"07:30","t1":"13:00","st":"Hari kejohanan","v":"golf","ti":"Kejohanan Golf — VIP, jemputan & berpasukan","no":"","k":"final","n":"Tee-off shotgun 07:30 · serahan kad skor, makan tengah hari & penyampaian hadiah","m":[],"id":"d3-golf-0730"},{"d":3,"s":"badminton","t0":"08:00","t1":"12:30","st":"Peringkat kumpulan · Pusingan 1","v":"dewan-badminton","ti":"4 perlawanan berpasukan","no":"C1–C4-1","k":"match","n":"5 game × 20 minit setiap perlawanan","m":[["C1-1 · Court 1–3","A1 vs A2","Kumpulan A"],["C2-1 · Court 1–3","A3 vs A4","Kumpulan A"],["C3-1 · Court 4–6","B1 vs B2","Kumpulan B"],["C4-1 · Court 4–6","B3 vs B4","Kumpulan B"]],"id":"d3-badminton-0800-c1c41"},{"d":3,"s":"bola-sepak","t0":"08:00","t1":"09:30","st":"Peringkat kumpulan","v":"cascara","ti":"A3 vs A1","no":"M5","k":"match","n":"Kumpulan A","m":[],"id":"d3-bola-sepak-0800-m5"},{"d":3,"s":"bola-sepak","t0":"08:00","t1":"09:30","st":"Peringkat kumpulan","v":"padang-unimas","ti":"B3 vs B1","no":"M6","k":"match","n":"Kumpulan B","m":[],"id":"d3-bola-sepak-0800-m6"},{"d":3,"s":"bola-tampar","t0":"08:00","t1":"09:00","st":"Peringkat kumpulan 1","v":"kawada","ti":"X1 vs X3","no":"M9","k":"match","n":"Kumpulan X","m":[],"id":"d3-bola-tampar-0800-m9"},{"d":3,"s":"ping-pong","t0":"08:00","t1":"09:00","st":"Pendaftaran & pembukaan","v":"extreme-tt","ti":"Pendaftaran pasukan & upacara pembukaan ringkas","no":"","k":"prep","n":"","m":[],"id":"d3-ping-pong-0800"},{"d":3,"s":"bola-jaring","t0":"08:30","t1":"08:50","st":"Peringkat kumpulan","v":"stadium-samarahan","ti":"B1 vs B2","no":"M1","k":"match","n":"Kumpulan B · format 7-3-7","m":[],"id":"d3-bola-jaring-0830-m1"},{"d":3,"s":"bola-jaring","t0":"08:50","t1":"09:10","st":"Peringkat kumpulan","v":"stadium-samarahan","ti":"B3 vs B4","no":"M2","k":"match","n":"Kumpulan B · format 7-3-7","m":[],"id":"d3-bola-jaring-0850-m2"},{"d":3,"s":"bola-tampar","t0":"09:00","t1":"10:00","st":"Peringkat kumpulan 1","v":"kawada","ti":"X2 vs X4","no":"M10","k":"match","n":"Kumpulan X","m":[],"id":"d3-bola-tampar-0900-m10"},{"d":3,"s":"dart","t0":"09:00","t1":"11:00","st":"Peringkat kumpulan · Sesi 1","v":"pavilion","ti":"4 perlawanan serentak (M1–M4)","no":"M1–M4","k":"match","n":"","m":[["M1 · Glg 1 & 2","PERLIS (A1) vs SARAWAK (A2)","Kumpulan A"],["M2 · Glg 3 & 4","LABUAN (A3) vs KEDAH (A4)","Kumpulan A"],["M3 · Glg 5 & 6","SABAH (B1) vs KADER (B2)","Kumpulan B"],["M4 · Glg 7 & 8","JOHOR (B3) vs CREATE (B4)","Kumpulan B"]],"id":"d3-dart-0900-m1m4"},{"d":3,"s":"esport","t0":"09:00","t1":"10:30","st":"Peringkat kumpulan · Pusingan 1","v":"centexs","ti":"Kumpulan A & B — pusingan 1","no":"","k":"match","n":"Best of 3","m":[["Kumpulan A","Team 1 vs Team 2 · Team 3 vs Team 4",""],["Kumpulan B","Team 1 vs Team 2 · Team 3 vs Team 4",""]],"id":"d3-esport-0900"},{"d":3,"s":"ping-pong","t0":"09:00","t1":"10:00","st":"Peringkat kumpulan","v":"extreme-tt","ti":"6 perlawanan serentak (M1–M6)","no":"M1–M6","k":"match","n":"Best of 5 set","m":[["M1 · Meja 1","A1 vs A3",""],["M2 · Meja 2","B1 vs B3",""],["M3 · Meja 3","C1 vs C3",""],["M4 · Meja 4","C2 vs C4",""],["M5 · Meja 5","D1 vs D3",""],["M6 · Meja 6","D2 vs D4",""]],"id":"d3-ping-pong-0900-m1m6"},{"d":3,"s":"tenpin","t0":"09:00","t1":"12:30","st":"Blok 1","v":"megalanes","ti":"Trios Wanita & Trios Veteran Lelaki","no":"","k":"match","n":"Oiling medium 42' · check-in 09:00–09:45 · roll-off 10:00 · 4 game","m":[],"id":"d3-tenpin-0900"},{"d":3,"s":"bola-jaring","t0":"09:10","t1":"09:30","st":"Peringkat kumpulan","v":"stadium-samarahan","ti":"A1 vs A2","no":"M3","k":"match","n":"Kumpulan A · format 7-3-7","m":[],"id":"d3-bola-jaring-0910-m3"},{"d":3,"s":"bola-jaring","t0":"09:30","t1":"09:50","st":"Peringkat kumpulan","v":"stadium-samarahan","ti":"A3 vs A4","no":"M4","k":"match","n":"Kumpulan A · format 7-3-7","m":[],"id":"d3-bola-jaring-0930-m4"},{"d":3,"s":"bola-jaring","t0":"09:50","t1":"10:10","st":"Peringkat kumpulan","v":"stadium-samarahan","ti":"B5 vs B1","no":"M5","k":"match","n":"Kumpulan B · format 7-3-7","m":[],"id":"d3-bola-jaring-0950-m5"},{"d":3,"s":"bola-tampar","t0":"10:00","t1":"11:00","st":"Peringkat kumpulan 1","v":"kawada","ti":"Y1 vs Y3","no":"M11","k":"match","n":"Kumpulan Y","m":[],"id":"d3-bola-tampar-1000-m11"},{"d":3,"s":"ping-pong","t0":"10:00","t1":"11:00","st":"Peringkat kumpulan","v":"extreme-tt","ti":"6 perlawanan serentak (M7–M12)","no":"M7–M12","k":"match","n":"Best of 5 set","m":[["M7 · Meja 1","A2 vs A3",""],["M8 · Meja 2","B2 vs B3",""],["M9 · Meja 3","C2 vs C3",""],["M10 · Meja 4","C1 vs C4",""],["M11 · Meja 5","D2 vs D3",""],["M12 · Meja 6","D1 vs D4",""]],"id":"d3-ping-pong-1000-m7m12"},{"d":3,"s":"bola-jaring","t0":"10:10","t1":"10:30","st":"Peringkat kumpulan","v":"stadium-samarahan","ti":"B2 vs B3","no":"M6","k":"match","n":"Kumpulan B · format 7-3-7","m":[],"id":"d3-bola-jaring-1010-m6"},{"d":3,"s":"bola-jaring","t0":"10:30","t1":"10:50","st":"Peringkat kumpulan","v":"stadium-samarahan","ti":"A1 vs A3","no":"M7","k":"match","n":"Kumpulan A · format 7-3-7","m":[],"id":"d3-bola-jaring-1030-m7"},{"d":3,"s":"esport","t0":"10:30","t1":"12:00","st":"Peringkat kumpulan · Pusingan 2","v":"centexs","ti":"Kumpulan A & B — pusingan 2","no":"","k":"match","n":"Best of 3","m":[["Kumpulan A","Team 3 vs Team 1 · Team 4 vs Team 2",""],["Kumpulan B","Team 3 vs Team 1 · Team 4 vs Team 2",""]],"id":"d3-esport-1030"},{"d":3,"s":"bola-jaring","t0":"10:50","t1":"11:10","st":"Peringkat kumpulan","v":"stadium-samarahan","ti":"A2 vs A4","no":"M8","k":"match","n":"Kumpulan A · format 7-3-7","m":[],"id":"d3-bola-jaring-1050-m8"},{"d":3,"s":"bola-tampar","t0":"11:00","t1":"12:00","st":"Peringkat kumpulan 1","v":"kawada","ti":"Z1 vs Z3","no":"M12","k":"match","n":"Kumpulan Z · undian pusingan ke-2 selepas perlawanan ini","m":[],"id":"d3-bola-tampar-1100-m12"},{"d":3,"s":"dart","t0":"11:00","t1":"13:00","st":"Peringkat kumpulan · Sesi 2","v":"pavilion","ti":"4 perlawanan serentak (M5–M8)","no":"M5–M8","k":"match","n":"","m":[["M5 · Glg 1 & 2","PERLIS (A1) vs LABUAN (A3)","Kumpulan A"],["M6 · Glg 3 & 4","SARAWAK (A2) vs KEDAH (A4)","Kumpulan A"],["M7 · Glg 5 & 6","SABAH (B1) vs JOHOR (B3)","Kumpulan B"],["M8 · Glg 7 & 8","KADER (B2) vs CREATE (B4)","Kumpulan B"]],"id":"d3-dart-1100-m5m8"},{"d":3,"s":"ping-pong","t0":"11:00","t1":"12:00","st":"Peringkat kumpulan","v":"extreme-tt","ti":"6 perlawanan serentak (M13–M18)","no":"M13–M18","k":"match","n":"Best of 5 set","m":[["M13 · Meja 1","A1 vs A2",""],["M14 · Meja 2","B1 vs B2",""],["M15 · Meja 3","C3 vs C4",""],["M16 · Meja 4","C1 vs C2",""],["M17 · Meja 5","D1 vs D2",""],["M18 · Meja 6","A1 vs A2",""]],"id":"d3-ping-pong-1100-m13m18"},{"d":3,"s":"bola-jaring","t0":"11:10","t1":"11:30","st":"Peringkat kumpulan","v":"stadium-samarahan","ti":"B4 vs B5","no":"M9","k":"match","n":"Kumpulan B · format 7-3-7","m":[],"id":"d3-bola-jaring-1110-m9"},{"d":3,"s":"bola-jaring","t0":"11:30","t1":"11:50","st":"Peringkat kumpulan","v":"stadium-samarahan","ti":"B1 vs B3","no":"M10","k":"match","n":"Kumpulan B · format 7-3-7","m":[],"id":"d3-bola-jaring-1130-m10"},{"d":3,"s":"bola-tampar","t0":"12:00","t1":"13:00","st":"Pusingan kedua","v":"kawada","ti":"A1 vs A2","no":"M13","k":"match","n":"Kumpulan A (1st X vs 2nd Y)","m":[],"id":"d3-bola-tampar-1200-m13"},{"d":3,"s":"esport","t0":"12:00","t1":"13:30","st":"Peringkat kumpulan · Pusingan 3","v":"centexs","ti":"Kumpulan A — pusingan 3","no":"","k":"match","n":"Best of 3","m":[["Kumpulan A","Team 2 vs Team 3 · Team 1 vs Team 4",""]],"id":"d3-esport-1200"},{"d":3,"s":"bola-tampar","t0":"13:00","t1":"14:00","st":"Pusingan kedua","v":"kawada","ti":"B1 vs B2","no":"M14","k":"match","n":"Kumpulan B (1st Y vs 2nd X)","m":[],"id":"d3-bola-tampar-1300-m14"},{"d":3,"s":"tenpin","t0":"13:00","t1":"17:00","st":"Blok 1","v":"megalanes","ti":"Trios Campuran & Trios Lelaki Terbuka","no":"","k":"match","n":"Oiling medium 42' · check-in 13:00–13:45 · roll-off 14:00 · 4 game","m":[],"id":"d3-tenpin-1300"},{"d":3,"s":"bola-jaring","t0":"13:40","t1":"14:00","st":"Peringkat kumpulan","v":"stadium-samarahan","ti":"B2 vs B4","no":"M11","k":"match","n":"Kumpulan B · format 7-3-7","m":[],"id":"d3-bola-jaring-1340-m11"},{"d":3,"s":"badminton","t0":"14:00","t1":"18:30","st":"Peringkat kumpulan · Pusingan 2","v":"dewan-badminton","ti":"4 perlawanan berpasukan","no":"C1–C4-2","k":"match","n":"5 game × 20 minit setiap perlawanan","m":[["C1-2 · Court 1–3","A1 vs A3","Kumpulan A"],["C2-2 · Court 1–3","A2 vs A4","Kumpulan A"],["C3-2 · Court 4–6","B1 vs B3","Kumpulan B"],["C4-2 · Court 4–6","B2 vs B4","Kumpulan B"]],"id":"d3-badminton-1400-c1c42"},{"d":3,"s":"bola-jaring","t0":"14:00","t1":"14:20","st":"Peringkat kumpulan","v":"stadium-samarahan","ti":"B5 vs B3","no":"M12","k":"match","n":"Kumpulan B · format 7-3-7","m":[],"id":"d3-bola-jaring-1400-m12"},{"d":3,"s":"bola-tampar","t0":"14:00","t1":"15:00","st":"Pusingan kedua","v":"kawada","ti":"A2 vs A3","no":"M15","k":"match","n":"Kumpulan A (2nd Y vs 1st/2nd Z)","m":[],"id":"d3-bola-tampar-1400-m15"},{"d":3,"s":"dart","t0":"14:00","t1":"16:00","st":"Peringkat kumpulan · Sesi 3","v":"pavilion","ti":"4 perlawanan serentak (M9–M12)","no":"M9–M12","k":"match","n":"","m":[["M9 · Glg 1 & 2","PERLIS (A1) vs KEDAH (A4)","Kumpulan A"],["M10 · Glg 3 & 4","SARAWAK (A2) vs LABUAN (A3)","Kumpulan A"],["M11 · Glg 5 & 6","SABAH (B1) vs CREATE (B4)","Kumpulan B"],["M12 · Glg 7 & 8","KADER (B2) vs JOHOR (B3)","Kumpulan B"]],"id":"d3-dart-1400-m9m12"},{"d":3,"s":"pickleball","t0":"14:00","t1":"17:00","st":"Pengujian gelanggang & latihan","v":"picklepro","ti":"Pengujian gelanggang & latihan pasukan","no":"","k":"prep","n":"Court R1 Perak · R2 Sabah · R3 Sarawak · R4 terbuka","m":[],"id":"d3-pickleball-1400"},{"d":3,"s":"ping-pong","t0":"14:00","t1":"15:00","st":"Suku akhir","v":"extreme-tt","ti":"4 suku akhir serentak (M19–M22)","no":"M19–M22","k":"match","n":"Best of 5 set","m":[["QF1 · Meja 1","Johan A vs Naib Johan C",""],["QF2 · Meja 2","Johan D vs Naib Johan B",""],["QF3 · Meja 3","Johan C vs Naib Johan A",""],["QF4 · Meja 4","Johan B vs Naib Johan D",""]],"id":"d3-ping-pong-1400-m19m22"},{"d":3,"s":"bola-jaring","t0":"14:20","t1":"14:40","st":"Peringkat kumpulan","v":"stadium-samarahan","ti":"A1 vs A4","no":"M13","k":"match","n":"Kumpulan A · format 7-3-7","m":[],"id":"d3-bola-jaring-1420-m13"},{"d":3,"s":"esport","t0":"14:30","t1":"16:00","st":"Pusingan 3 & Upper Bracket","v":"centexs","ti":"Kumpulan B pusingan 3 + Upper Bracket","no":"","k":"match","n":"Best of 3","m":[["Kumpulan B","Team 2 vs Team 3 · Team 1 vs Team 4",""],["Upper Bracket","A1 vs B4 · B2 vs A3 · A2 vs B3 · B1 vs A4",""]],"id":"d3-esport-1430"},{"d":3,"s":"bola-jaring","t0":"14:40","t1":"15:00","st":"Peringkat kumpulan","v":"stadium-samarahan","ti":"A2 vs A3","no":"M14","k":"match","n":"Kumpulan A · format 7-3-7","m":[],"id":"d3-bola-jaring-1440-m14"},{"d":3,"s":"bola-jaring","t0":"15:00","t1":"15:20","st":"Peringkat kumpulan","v":"stadium-samarahan","ti":"B4 vs B1","no":"M15","k":"match","n":"Kumpulan B · format 7-3-7","m":[],"id":"d3-bola-jaring-1500-m15"},{"d":3,"s":"bola-tampar","t0":"15:00","t1":"16:00","st":"Pusingan kedua","v":"kawada","ti":"B2 vs B3","no":"M16","k":"match","n":"Kumpulan B (2nd X vs 1st/2nd Z)","m":[],"id":"d3-bola-tampar-1500-m16"},{"d":3,"s":"bola-jaring","t0":"15:20","t1":"15:40","st":"Peringkat kumpulan","v":"stadium-samarahan","ti":"B2 vs B5","no":"M16","k":"match","n":"Kumpulan B · format 7-3-7","m":[],"id":"d3-bola-jaring-1520-m16"},{"d":3,"s":"bola-tampar","t0":"16:00","t1":"17:00","st":"Pusingan kedua","v":"kawada","ti":"A1 vs A3","no":"M17","k":"match","n":"Kumpulan A (1st X vs 1st/2nd Z)","m":[],"id":"d3-bola-tampar-1600-m17"},{"d":3,"s":"dart","t0":"16:00","t1":"18:00","st":"Suku akhir","v":"pavilion","ti":"4 suku akhir serentak (M13–M16)","no":"M13–M16","k":"match","n":"","m":[["M13 · Glg 1 & 2","Johan A vs Ke-4 B","Q1"],["M14 · Glg 3 & 4","Naib Johan B vs Ke-3 A","Q2"],["M15 · Glg 5 & 6","Johan B vs Ke-4 A","Q3"],["M16 · Glg 7 & 8","Naib Johan A vs Ke-3 B","Q4"]],"id":"d3-dart-1600-m13m16"},{"d":3,"s":"bola-tampar","t0":"17:00","t1":"18:00","st":"Pusingan kedua","v":"kawada","ti":"B1 vs B3","no":"M18","k":"match","n":"Kumpulan B (1st Y vs 1st/2nd Z)","m":[],"id":"d3-bola-tampar-1700-m18"},{"d":3,"s":"bola-sepak","t0":"18:00","t1":"20:00","st":"Separuh akhir 1","v":"cascara","ti":"Johan Kump. A vs Naib Johan Kump. B","no":"M7","k":"match","n":"","m":[],"id":"d3-bola-sepak-1800-m7"},{"d":3,"s":"bola-tampar","t0":"18:00","t1":"19:30","st":"Separuh akhir 1","v":"kawada","ti":"1st Kump. A vs 2nd Kump. B","no":"M19","k":"match","n":"","m":[],"id":"d3-bola-tampar-1800-m19"},{"d":3,"s":"badminton","t0":"19:30","t1":"22:00","st":"Peringkat kumpulan · Pusingan 3","v":"dewan-badminton","ti":"4 perlawanan berpasukan","no":"C1–C4-3","k":"match","n":"5 game × 20 minit setiap perlawanan","m":[["C1-3 · Court 1–3","A1 vs A4","Kumpulan A"],["C2-3 · Court 1–3","A2 vs A3","Kumpulan A"],["C3-3 · Court 4–6","B1 vs B4","Kumpulan B"],["C4-3 · Court 4–6","B2 vs B3","Kumpulan B"]],"id":"d3-badminton-1930-c1c43"},{"d":3,"s":"bola-tampar","t0":"19:30","t1":"21:00","st":"Separuh akhir 2","v":"kawada","ti":"1st Kump. B vs 2nd Kump. A","no":"M20","k":"match","n":"","m":[],"id":"d3-bola-tampar-1930-m20"},{"d":3,"s":"bola-sepak","t0":"20:00","t1":"22:00","st":"Separuh akhir 2","v":"cascara","ti":"Johan Kump. B vs Naib Johan Kump. A","no":"M8","k":"match","n":"","m":[],"id":"d3-bola-sepak-2000-m8"},{"d":4,"s":"pickleball","t0":"07:00","t1":"08:00","st":"Pendaftaran & taklimat","v":"picklepro","ti":"Pendaftaran & taklimat semua pasukan","no":"","k":"prep","n":"5 kategori: Lelaki Terbuka · Wanita (P&P + Terbuka) · Campuran ≥70 · VIP Lelaki · P&P + Veteran · Classic 15, best of 3","m":[],"id":"d4-pickleball-0700"},{"d":4,"s":"badminton","t0":"08:00","t1":"10:00","st":"Separuh akhir","v":"dewan-badminton","ti":"2 separuh akhir serentak","no":"SF1–SF2","k":"match","n":"5 game × 20 minit","m":[["SF1 · Court 1 & 2","Johan Kump. A vs Naib Johan Kump. B",""],["SF2 · Court 3 & 4","Johan Kump. B vs Naib Johan Kump. A",""]],"id":"d4-badminton-0800-sf1sf2"},{"d":4,"s":"bola-tampar","t0":"08:00","t1":"09:30","st":"Penentuan tempat ke-3 & 4","v":"kawada","ti":"Kalah M19 vs Kalah M20","no":"M21","k":"match","n":"","m":[],"id":"d4-bola-tampar-0800-m21"},{"d":4,"s":"pickleball","t0":"08:00","t1":"09:30","st":"Round robin · Match 1","v":"picklepro","ti":"Sarawak vs Sabah","no":"M01–M05","k":"match","n":"5 acara","m":[],"id":"d4-pickleball-0800-m01m05"},{"d":4,"s":"esport","t0":"08:30","t1":"10:00","st":"Upper & Lower Bracket","v":"centexs","ti":"Upper Bracket & Lower Bracket","no":"","k":"match","n":"Best of 3","m":[["Upper Bracket","W1 vs W2 · W3 vs W4",""],["Lower Bracket","L1 vs L2 · L3 vs L4",""]],"id":"d4-esport-0830"},{"d":4,"s":"ping-pong","t0":"08:30","t1":"09:00","st":"Pendaftaran","v":"extreme-tt","ti":"Pendaftaran pasukan layak","no":"","k":"prep","n":"","m":[],"id":"d4-ping-pong-0830"},{"d":4,"s":"bola-jaring","t0":"09:00","t1":"09:30","st":"Separuh akhir 1","v":"stadium-samarahan","ti":"Johan A vs Naib Johan B","no":"M17","k":"match","n":"Format 10-3-10","m":[],"id":"d4-bola-jaring-0900-m17"},{"d":4,"s":"dart","t0":"09:00","t1":"12:00","st":"Separuh akhir & tempat ke-3","v":"pavilion","ti":"Separuh akhir (M17–M18) & tempat ke-3 (M19)","no":"M17–M19","k":"match","n":"","m":[["M17 SF1 · Glg 2","Menang M13 vs Menang M14",""],["M18 SF2 · Glg 4","Menang M15 vs Menang M16",""],["M19 · Glg 3","Kalah M17 vs Kalah M18","Penentuan tempat ke-3"]],"id":"d4-dart-0900-m17m19"},{"d":4,"s":"ping-pong","t0":"09:00","t1":"10:00","st":"Separuh akhir","v":"extreme-tt","ti":"2 separuh akhir serentak (M23–M24)","no":"M23–M24","k":"match","n":"Best of 5 set","m":[["M23 SF1 · Meja 1","Pemenang QF1 vs Pemenang QF2",""],["M24 SF2 · Meja 2","Pemenang QF3 vs Pemenang QF4",""]],"id":"d4-ping-pong-0900-m23m24"},{"d":4,"s":"tenpin","t0":"09:00","t1":"12:30","st":"Blok 2","v":"megalanes","ti":"Trios Wanita","no":"","k":"match","n":"Oiling long 49' · check-in 09:00–09:45 · roll-off 10:00 · 4 game","m":[],"id":"d4-tenpin-0900"},{"d":4,"s":"bola-jaring","t0":"09:30","t1":"10:00","st":"Separuh akhir 2","v":"stadium-samarahan","ti":"Johan B vs Naib Johan A","no":"M18","k":"match","n":"Format 10-3-10","m":[],"id":"d4-bola-jaring-0930-m18"},{"d":4,"s":"bola-tampar","t0":"09:30","t1":"11:00","st":"AKHIR","v":"kawada","ti":"Menang M19 vs Menang M20","no":"M22","k":"final","n":"","m":[],"id":"d4-bola-tampar-0930-m22"},{"d":4,"s":"pickleball","t0":"09:30","t1":"11:00","st":"Round robin · Match 2","v":"picklepro","ti":"Sabah vs Perak","no":"M06–M10","k":"match","n":"5 acara · rehat 11:00–14:00 selepas ini","m":[],"id":"d4-pickleball-0930-m06m10"},{"d":4,"s":"esport","t0":"10:00","t1":"11:30","st":"Upper Bracket separuh akhir","v":"centexs","ti":"Upper Bracket SF + Lower Bracket","no":"","k":"match","n":"Best of 3","m":[["Upper Bracket SF","W7 vs W8",""],["Lower Bracket","W5 vs L7 · W6 vs L8",""]],"id":"d4-esport-1000"},{"d":4,"s":"ping-pong","t0":"10:00","t1":"11:00","st":"Penentuan tempat ke-3","v":"extreme-tt","ti":"Kalah SF1 vs Kalah SF2","no":"M25","k":"match","n":"Meja 1 · best of 5 set","m":[],"id":"d4-ping-pong-1000-m25"},{"d":4,"s":"badminton","t0":"11:00","t1":"12:30","st":"Penentuan tempat ke-3","v":"dewan-badminton","ti":"Kalah SF1 vs Kalah SF2","no":"Tempat ke-3","k":"match","n":"Court 1 & 2","m":[],"id":"d4-badminton-1100-tempatke3"},{"d":4,"s":"bola-jaring","t0":"11:00","t1":"11:40","st":"Penentuan tempat ke-3 & 4","v":"stadium-samarahan","ti":"Kalah M17 vs Kalah M18","no":"M19","k":"match","n":"","m":[],"id":"d4-bola-jaring-1100-m19"},{"d":4,"s":"ping-pong","t0":"11:00","t1":"12:00","st":"AKHIR","v":"extreme-tt","ti":"Pemenang SF1 vs Pemenang SF2","no":"M26","k":"final","n":"Meja 1 · best of 5 set · diikuti penyampaian hadiah","m":[],"id":"d4-ping-pong-1100-m26"},{"d":4,"s":"bola-jaring","t0":"11:40","t1":"12:20","st":"AKHIR","v":"stadium-samarahan","ti":"Menang M17 vs Menang M18","no":"M20","k":"final","n":"Format 15-5-15","m":[],"id":"d4-bola-jaring-1140-m20"},{"d":4,"s":"badminton","t0":"13:00","t1":"15:00","st":"AKHIR","v":"dewan-badminton","ti":"Pemenang SF1 vs Pemenang SF2","no":"FINAL","k":"final","n":"Court 1 & 2 · penentuan johan & naib johan","m":[],"id":"d4-badminton-1300-final"},{"d":4,"s":"tenpin","t0":"13:30","t1":"17:00","st":"Blok 2","v":"megalanes","ti":"Trios Campuran & Trios Veteran Lelaki","no":"","k":"match","n":"Oiling long 49' · check-in 13:30–14:15 · roll-off 14:30 · 4 game","m":[],"id":"d4-tenpin-1330"},{"d":4,"s":"pickleball","t0":"14:00","t1":"15:30","st":"Round robin · Match 3","v":"picklepro","ti":"Perak vs Sarawak","no":"M11–M15","k":"match","n":"5 acara","m":[],"id":"d4-pickleball-1400-m11m15"},{"d":4,"s":"esport","t0":"14:15","t1":"15:45","st":"Lower Bracket separuh akhir","v":"centexs","ti":"W9 vs W10","no":"","k":"match","n":"Best of 3","m":[],"id":"d4-esport-1415"},{"d":4,"s":"bola-jaring","t0":"14:30","t1":"16:30","st":"Raptai penuh","v":"stadium-samarahan","ti":"Raptai penuh kejohanan (semua kontinjen)","no":"","k":"prep","n":"","m":[],"id":"d4-bola-jaring-1430"},{"d":4,"s":"dart","t0":"14:30","t1":"16:30","st":"AKHIR","v":"pavilion","ti":"Menang M17 vs Menang M18","no":"M20","k":"final","n":"Gelanggang 6","m":[],"id":"d4-dart-1430-m20"},{"d":4,"s":"bola-sepak","t0":"15:00","t1":"17:00","st":"Penentuan tempat ke-3 & 4","v":"cascara","ti":"Kalah M7 vs Kalah M8","no":"M9","k":"match","n":"","m":[],"id":"d4-bola-sepak-1500-m9"},{"d":4,"s":"esport","t0":"15:45","t1":"17:00","st":"Lower Bracket final","v":"centexs","ti":"W12 vs L11","no":"","k":"match","n":"Penentuan tempat ke-3 · best of 3","m":[],"id":"d4-esport-1545"},{"d":4,"s":"pickleball","t0":"16:00","t1":"17:00","st":"Acara penutup","v":"picklepro","ti":"Penyampaian pingat","no":"","k":"award","n":"","m":[],"id":"d4-pickleball-1600"},{"d":4,"s":"esport","t0":"17:30","t1":"19:00","st":"GRAND FINAL","v":"centexs","ti":"W11 vs W13","no":"","k":"final","n":"Johan & naib johan · best of 3","m":[],"id":"d4-esport-1730"},{"d":4,"s":"majlis","t0":"19:00","t1":"22:00","st":"Majlis Perasmian","v":"waterfront","ti":"Majlis Perasmian SURYA 2026","no":"","k":"majlis","n":"","m":[],"id":"d4-majlis-1900"},{"d":5,"s":"tenpin","t0":"09:00","t1":"12:30","st":"Blok 2","v":"megalanes","ti":"Trios Lelaki Terbuka","no":"","k":"match","n":"Oiling long 49' · check-in 09:00–09:45 · roll-off 10:00 · 4 game","m":[],"id":"d5-tenpin-0900"},{"d":5,"s":"tenpin","t0":"12:30","t1":"13:30","st":"Penyampaian hadiah","v":"megalanes","ti":"Upacara penyampaian hadiah semua kategori","no":"","k":"award","n":"","m":[],"id":"d5-tenpin-1230"},{"d":5,"s":"bola-sepak","t0":"15:00","t1":"17:00","st":"AKHIR","v":"cascara","ti":"Menang M7 vs Menang M8","no":"M10","k":"final","n":"","m":[],"id":"d5-bola-sepak-1500-m10"},{"d":5,"s":"majlis","t0":"19:00","t1":"23:00","st":"Majlis Penutupan","v":"wisma-melayu","ti":"Majlis Penutupan & Makan Malam SURYA 2026","no":"","k":"majlis","n":"","m":[],"id":"d5-majlis-1900"}],"updated":"25 Nov 2026","source":"SURYA_2026_Master_Game_Calendar V4 (latest)"}</script>
+<script>
+{
+const API = '__API_URL_PENDING__';
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const EV = DATA.events, SP = DATA.sports, VN = DATA.venues;
+const DAYS = [null,{h:'Selasa',s:'Sel'},{h:'Rabu',s:'Rab'},{h:'Khamis',s:'Kha'},{h:'Jumaat',s:'Jum'},{h:'Sabtu',s:'Sab'}];
+const SC = {'bola-sepak':'#2e7d32','bola-tampar':'#ef6c00','bola-jaring':'#c2185b','badminton':'#1565c0','ping-pong':'#d32f2f','dart':'#795548','tenpin':'#6a3fb5','pickleball':'#00897b','golf':'#7c9a1e','esport':'#3949ab','majlis':'#c9971a'};
+const ITEMS = [['drive','Gambar telah dimuatnaik di Drive'],['publisiti','Publisiti telah dilaksanakan']];
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mins = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+const short = v => VN[v].split(',')[0];
+const MAS = s => s === 'majlis' ? ['maskot/majlis-belang.webp', 'maskot/majlis-mimi.webp'] : [`maskot/${s}-belang.webp`, `maskot/${s}-mimi.webp`];
+const pair = s => `<span class="mpair">${MAS(s).map((u, i) => `<img src="${u}" alt="${i ? 'Mimi' : 'Belang'}" loading="lazy">`).join('')}</span>`;
+{ const c = {}; EV.forEach(e => { c[e.s] = (c[e.s] || 0) + 1; e.mi = c[e.s] % 2; }); }
+const SPV = {};
+EV.forEach(e => { (SPV[e.s] = SPV[e.s] || []).includes(e.v) || SPV[e.s].push(e.v); });
+const label = e => `${DAYS[e.d].s} ${e.d} Dis ${e.t0} · ${SP[e.s]}${e.no ? ' ' + e.no : ''} · ${e.ti}`;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('surya26:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { if (v == null) localStorage.removeItem('surya26:' + k); else localStorage.setItem('surya26:' + k, JSON.stringify(v)); } catch (e) {} }
+};
+
+/* ---------- state ---------- */
+const nowK = () => {
+  const p = {};
+  new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Kuching', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hourCycle:'h23'}).formatToParts(new Date()).forEach(x => p[x.type] = x.value);
+  return {y:+p.year, mo:+p.month, d:+p.day, min:+p.hour * 60 + +p.minute};
+};
+const liveDay = () => { const n = nowK(); return (n.y === 2026 && n.mo === 12 && n.d >= 1 && n.d <= 5) ? n.d : 0; };
+const nowKey = () => { const n = nowK(), t = n.y * 10000 + n.mo * 100 + n.d; return t < 20261201 ? -1 : t > 20261205 ? 1e9 : n.d * 1440 + n.min; };
+const saved = store.get('f', {});
+const st = {day: liveDay() || (Number.isInteger(saved.day) ? saved.day : 1), sport: SP[saved.sport] ? saved.sport : '', crew: saved.crew || '', hidePrep: !!saved.hidePrep};
+const open = new Set(), drafts = {};
+let P = {}, T = {}, C = {};
+let me = store.get('me', '') || '', pin = store.get('pin', '') || '';
+let isAdmin = !!pin, dbState = 'wait', rev = '', prev = '', pending = 0;
+
+/* ---------- api ---------- */
+async function api(body) {
+  const r = await fetch(API, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify(body), redirect: 'follow'});
+  const j = await r.json();
+  if (!j.ok) { const e = new Error(j.err || 'gagal'); e.code = j.err; throw e; }
+  return j;
+}
+let pulling = false;
+async function pull() {
+  if (pulling) return; pulling = true;
+  try {
+    const r = await fetch(`${API}?a=all&rev=${encodeURIComponent(rev)}&prev=${encodeURIComponent(prev)}&t=${Date.now()}`);
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.err || 'gagal');
+    if (j.petugas) { const o = {}; j.petugas.forEach(p => { if (p && p.id) o[p.id] = p; }); P = o; prev = j.prev; }
+    if (j.tugasan && !pending) {
+      T = j.tugasan || {};
+      const o = {};
+      Object.entries(j.status || {}).forEach(([id, v]) => { o[id] = {items: {drive: v.drive, publisiti: v.publisiti}, nota: v.nota}; });
+      C = o; rev = j.rev;
+    }
+    const changed = dbState !== 'ok' || j.petugas || j.tugasan;
+    dbState = 'ok';
+    if (changed) renderAll();
+  } catch (e) {
+    if (dbState !== 'ok') { dbState = 'err'; renderAll(); }
+  } finally { pulling = false; }
+}
+
+/* ---------- helpers ---------- */
+const safeId = s => typeof s === 'string' && /^[\w-]{1,40}$/.test(s);
+const initials = n => String(n || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '?';
+const okFoto = f => typeof f === 'string' && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(f);
+function av(p, sz) {
+  if (p && okFoto(p.foto)) return `<img class="av" src="${p.foto}" alt="" width="${sz}" height="${sz}" style="width:${sz}px;height:${sz}px">`;
+  return `<span class="av ini" style="width:${sz}px;height:${sz}px;font-size:${Math.round(sz / 2.6)}px">${esc(initials(p && p.nama))}</span>`;
+}
+const crewOf = id => (Array.isArray(T[id]) ? T[id] : []).filter(p => P[p]);
+const itemsOf = id => (C[id] && C[id].items) || {};
+const notaOf = id => (C[id] && C[id].nota && typeof C[id].nota.t === 'string') ? C[id].nota : null;
+const sortedP = () => Object.keys(P).sort((a, b) => (P[a].urutan || 0) - (P[b].urutan || 0) || String(P[a].nama).localeCompare(String(P[b].nama)));
+function waLink(tel) {
+  let d = String(tel || '').replace(/\D/g, '');
+  if (!d) return '';
+  if (d.startsWith('0')) d = '6' + d;
+  return 'https://wa.me/' + d;
+}
+const nowStr = () => new Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Kuching', day:'numeric', month:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit', hourCycle:'h23'}).format(new Date()).replace(',', '');
+let toastT;
+function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 2800); }
+const persist = () => store.set('f', {day: st.day, sport: st.sport, crew: st.crew, hidePrep: st.hidePrep});
+const pct = (a, n) => n ? Math.round(a / n * 100) : 0;
+const meter = (a, n, c) => `<div class="meter" style="--p:${pct(a, n)}%;--bc:var(${c})"></div>`;
+const view = () => location.hash === '#petugas' ? 'petugas' : location.hash === '#dashboard' ? 'dashboard' : 'jadual';
+
+function visible() {
+  return EV.filter(e => (!st.day || e.d === st.day) && (!st.sport || e.s === st.sport)
+    && (!st.crew || crewOf(e.id).includes(st.crew)) && !(st.hidePrep && e.k === 'prep'));
+}
+const scope = () => EV.filter(e => (!st.day || e.d === st.day) && !(st.hidePrep && e.k === 'prep'));
+function tally(list) {
+  const r = {n: list.length, a: 0, dr: 0, pb: 0, nt: 0};
+  list.forEach(e => { const it = itemsOf(e.id); if (crewOf(e.id).length) r.a++; if (it.drive) r.dr++; if (it.publisiti) r.pb++; if (notaOf(e.id) && notaOf(e.id).t.trim()) r.nt++; });
+  return r;
+}
+
+/* ---------- header: countdown / live ---------- */
+function renderNow() {
+  const n = nowK(), el = $('#now');
+  const today = n.y * 10000 + n.mo * 100 + n.d;
+  const games = EV.filter(e => e.k !== 'prep').length, venues = new Set(EV.map(e => e.v)).size;
+  if (today < 20261201) {
+    const days = Math.round((Date.UTC(2026, 11, 1) - Date.UTC(n.y, n.mo - 1, n.d)) / 864e5);
+    el.innerHTML = `<div class="stats"><div class="stat"><b>${days}</b><span>hari lagi · bermula Selasa 1 Dis</span></div><div class="stat"><b>${games}</b><span>slot perlawanan &amp; majlis</span></div><div class="stat"><b>${venues}</b><span>venue liputan</span></div></div>`;
+  } else if (today > 20261205) {
+    el.innerHTML = `<div class="stats"><div class="stat"><b>Tamat</b><span>Terima kasih, pasukan Coverage SURYA 2026</span></div></div>`;
+  } else {
+    const todays = EV.filter(e => e.d === n.d);
+    const live = todays.filter(e => mins(e.t0) <= n.min && n.min < mins(e.t1));
+    let next = todays.filter(e => mins(e.t0) > n.min).slice(0, 3), nextLbl = 'Seterusnya hari ini';
+    if (!next.length && n.d < 5) { next = EV.filter(e => e.d === n.d + 1).slice(0, 3); nextLbl = 'Esok, ' + DAYS[n.d + 1].h; }
+    const li = e => `<li><b>${e.t0}</b>${esc(SP[e.s])} — ${esc(e.ti)} <span class="lv">· ${esc(short(e.v))}</span></li>`;
+    el.innerHTML = `<div class="livebox"><div><h4><span class="pulse"></span>Sedang berlangsung (${live.length})</h4><ul>${live.slice(0, 3).map(li).join('') || '<li style="color:var(--mut)">Tiada slot pada masa ini</li>'}${live.length > 3 ? `<li style="color:var(--mut)">+${live.length - 3} lagi — lihat jadual di bawah</li>` : ''}</ul></div><div><h4>${nextLbl}</h4><ul>${next.map(li).join('') || '<li style="color:var(--mut)">Tiada lagi slot</li>'}</ul></div></div>`;
+  }
+}
+
+/* ---------- day relay & sport chips ---------- */
+function renderDays() {
+  const cnt = d => EV.filter(e => e.d === d).length;
+  let h = `<button class="day all" type="button" data-day="0" aria-pressed="${st.day === 0}"><b>Semua</b><span>${EV.length} slot</span></button>`;
+  for (let d = 1; d <= 5; d++) h += `<button class="day d${d}" type="button" data-day="${d}" style="--c:var(--d${d})" aria-pressed="${st.day === d}"><b>${d}</b><span>${DAYS[d].s}<br>${cnt(d)} slot</span></button>`;
+  $('#days').innerHTML = h;
+}
+function renderSports() {
+  const inDay = s => EV.filter(e => e.s === s && (!st.day || e.d === st.day)).length;
+  let h = `<button class="sch" type="button" data-sport="" aria-pressed="${!st.sport}">${pair('majlis')}<span><b>Semua sukan</b><small>${st.day ? EV.filter(e => e.d === st.day).length : EV.length} slot</small></span></button>`;
+  h += Object.keys(SP).map(s => {
+    const n = inDay(s);
+    return `<button class="sch" type="button" data-sport="${s}" style="--sc:${SC[s]}" aria-pressed="${st.sport === s}"${!n && st.sport !== s ? ' hidden' : ''}>${pair(s)}<span><b>${esc(SP[s])}</b><small>${SPV[s].map(v => esc(short(v))).join(' · ')}</small></span></button>`;
+  }).join('');
+  $('#sports').innerHTML = h;
+}
+function renderCrewFilter() {
+  const sel = $('#fCrew'), ids = sortedP();
+  sel.innerHTML = '<option value="">Semua petugas</option>' + ids.map(id => `<option value="${esc(id)}">${esc(P[id].nama || 'Petugas')}</option>`).join('');
+  if (st.crew && !P[st.crew] && dbState === 'ok') st.crew = '';
+  sel.value = st.crew;
+  sel.disabled = !ids.length;
+  $('#pcount').textContent = ids.length ? '(' + ids.length + ')' : '';
+  $('#meName').textContent = me || 'belum dipilih';
+}
+
+/* ---------- schedule ---------- */
+function card(e) {
+  const it = itemsOf(e.id), nota = notaOf(e.id);
+  const done = ITEMS.filter(([k]) => it[k]).length;
+  const crew = crewOf(e.id), isOpen = open.has(e.id);
+  const badge = e.k === 'final' ? 'Akhir' : e.k === 'award' ? 'Hadiah' : e.k === 'majlis' ? 'Majlis' : '';
+  const hasNote = (drafts[e.id] ?? (nota && nota.t) ?? '').trim();
+  const meta = [e.st !== e.ti ? e.st : '', e.no, e.n].filter(Boolean).map(esc).join(' · ');
+  return `<article class="ev ${e.k}" data-id="${e.id}" style="--sc:${SC[e.s]}">
+<div class="eh"><div><div class="r1"><span class="sp">${esc(SP[e.s])}</span><span class="tt">${e.t0}–${e.t1}</span>${badge ? `<span class="fin">${badge}</span>` : ''}</div>
+<p class="venue">${esc(VN[e.v])}</p></div><img class="mas" src="${MAS(e.s)[e.mi]}" alt="Maskot ${e.mi ? 'Mimi' : 'Belang'} — ${esc(SP[e.s])}" loading="lazy"></div>
+<h3>${esc(e.ti)}</h3>
+${meta ? `<p class="meta">${meta}</p>` : ''}
+${e.m.length ? `<ul class="ms">${e.m.map(x => `<li><span>${esc(x[0])}</span><b>${esc(x[1])}</b>${x[2] ? `<i>${esc(x[2])}</i>` : ''}</li>`).join('')}</ul>` : ''}
+<div class="ft"><div class="crew">${crew.length ? crew.map(p => `<span class="chip">${av(P[p], 24)}${esc(P[p].nama || 'Petugas')}</span>`).join('') : '<span class="none">Belum ada petugas</span>'}${isAdmin ? '<button class="lnk" type="button" data-act="assign">Tetapkan</button>' : ''}</div>
+<button class="ckb" type="button" data-act="ck" aria-expanded="${isOpen}" aria-label="Status liputan: ${done} daripada 2 selesai"><span class="st dr${it.drive ? ' on' : ''}">Drive</span><span class="st pb${it.publisiti ? ' on' : ''}">Publisiti</span>${hasNote ? '<span class="nt">+ Nota</span>' : ''}</button></div>
+${isOpen ? ckHtml(e, it, nota) : ''}
+</article>`;
+}
+function ckHtml(e, it, nota) {
+  const ro = dbState !== 'ok';
+  const dis = ro ? ' disabled' : '';
+  const msg = dbState === 'wait' ? 'Memuatkan status pasukan…' : dbState === 'err' ? 'Tidak dapat menghubungi pangkalan data. Semak sambungan internet dan cuba lagi.' : (!me ? 'Pilih "Nama saya" dahulu supaya tanda anda direkodkan dengan nama.' : '');
+  const txt = drafts[e.id] ?? (nota ? nota.t : '');
+  return `<div class="ck">${msg ? `<p class="note">${msg}</p>` : ''}<ul>${ITEMS.map(([k, l], i) => {
+    const v = it[k];
+    return `<li><label><input type="checkbox" data-k="${k}"${v ? ' checked' : ''}${dis}><i>${i + 1}</i><span>${esc(l)}</span></label>${v ? `<small>✓ ${esc(v.by || 'Ahli pasukan')}${v.at ? ' · ' + esc(v.at) : ''}</small>` : ''}</li>`;
+  }).join('')}</ul>
+<label class="nota"><span><i>3</i>Nota</span><textarea data-note maxlength="2000" placeholder="Contoh: link folder Drive, keputusan perlawanan, nama VIP, isu di lapangan"${ro ? ' readonly' : ''}>${esc(txt)}</textarea><small data-nstat>${nota && nota.at ? 'Dikemas kini oleh ' + esc(nota.by || 'ahli pasukan') + ' · ' + esc(nota.at) : ''}</small></label></div>`;
+}
+function keepFocus(fn) {
+  const a = document.activeElement, ta = a && a.matches && a.matches('textarea[data-note]') ? a : null;
+  const id = ta ? ta.closest('.ev').dataset.id : null, sel = ta ? [ta.selectionStart, ta.selectionEnd] : null;
+  fn();
+  if (id) { const t = document.querySelector(`.ev[data-id="${id}"] textarea[data-note]`); if (t && t !== ta) { t.focus(); try { t.setSelectionRange(sel[0], sel[1]); } catch (e) {} } }
+}
+function renderList() {
+  if (view() !== 'jadual') return;
+  keepFocus(() => {
+    const list = visible();
+    const n = list.length, nPrep = list.filter(e => e.k === 'prep').length;
+    $('#count').textContent = n ? `${n} slot${st.day ? ' pada ' + DAYS[st.day].h + ' ' + st.day + ' Dis' : ''} · ${n - nPrep} perlawanan/majlis · ${nPrep} persediaan` : '';
+    if (!n) { $('#list').innerHTML = `<p class="empty-list">Tiada slot untuk tapisan ini.${st.crew ? ' Petugas ini belum ditetapkan pada mana-mana slot dalam tapisan ini.' : ''}</p>`; return; }
+    let h = '', lastD = 0, lastT = '';
+    list.forEach(e => {
+      if (e.d !== lastD) {
+        if (lastD) h += '</div></div>';
+        if (!st.day) h += `<h2 class="dayh" style="--dc:var(--d${e.d})">${DAYS[e.d].h}, ${e.d} Disember</h2>`;
+        lastD = e.d; lastT = e.t0;
+        h += `<div class="slot"><div class="time"><b>${e.t0}</b></div><div class="cards">`;
+      } else if (e.t0 !== lastT) {
+        h += `</div></div><div class="slot"><div class="time"><b>${e.t0}</b></div><div class="cards">`;
+        lastT = e.t0;
+      }
+      h += card(e);
+    });
+    $('#list').innerHTML = h + '</div></div>';
+  });
+}
+function refreshCard(id) {
+  keepFocus(() => {
+    const el = document.querySelector(`.ev[data-id="${id}"]`), e = EV.find(x => x.id === id);
+    if (el && e) { const tmp = document.createElement('div'); tmp.innerHTML = card(e); el.replaceWith(tmp.firstElementChild); }
+  });
+}
+
+/* ---------- dashboard ---------- */
+function nextFor(list) { const k = nowKey(); return list.find(e => e.d * 1440 + mins(e.t1) > k) || null; }
+function renderDash() {
+  if (view() !== 'dashboard') return;
+  const base = scope(), t = tally(base);
+  const where = st.day ? `${DAYS[st.day].h} ${st.day} Dis` : 'Keseluruhan';
+  $('#dTitle').textContent = `${where}: ${t.dr} daripada ${t.n} slot sudah dimuat naik ke Drive`;
+  $('#dSub').textContent = `${t.pb} slot sudah dipublisitikan · ${t.n - t.a} slot belum ada petugas · ${t.nt} slot ada nota${st.hidePrep ? ' · sesi persediaan tidak dikira' : ''}`;
+  const tile = (lbl, a, n, c) => `<div class="tile"><span>${lbl}</span><b>${a}<small>/ ${n}</small></b>${meter(a, n, c)}</div>`;
+  $('#dTiles').innerHTML = `<div class="tile"><span>Slot liputan</span><b>${t.n}</b><span style="font-weight:500">${t.n - base.filter(e => e.k === 'prep').length} perlawanan/majlis</span></div>`
+    + tile('Ada petugas', t.a, t.n, '--c-crew') + tile('Gambar di Drive', t.dr, t.n, '--c-drive') + tile('Publisiti', t.pb, t.n, '--c-pub');
+  $('#dNotice').textContent = dbState === 'wait' ? 'Memuatkan status pasukan…' : dbState === 'err' ? 'Tidak dapat menghubungi pangkalan data — angka di bawah mungkin belum terkini.' : '';
+  if (!st.day) {
+    let h = '<h3>Ikut hari</h3><p>Pilih hari di bar atas untuk melihat dashboard hari itu sahaja.</p><div class="dayrows"><div class="dr hdr"><span>Hari</span><span>Ada petugas</span><span>Gambar di Drive</span><span>Publisiti</span></div>';
+    for (let d = 1; d <= 5; d++) {
+      const r = tally(base.filter(e => e.d === d));
+      const m = (lbl, a, c) => `<div class="m" data-l="${lbl}"><b>${a}/${r.n}</b>${meter(a, r.n, c)}</div>`;
+      h += `<div class="dr"><span class="dn" style="--dc:var(--d${d})">${DAYS[d].h} ${d} Dis</span>${m('Ada petugas', r.a, '--c-crew')}${m('Gambar di Drive', r.dr, '--c-drive')}${m('Publisiti', r.pb, '--c-pub')}</div>`;
+    }
+    $('#dDays').innerHTML = h + '</div>';
+  } else $('#dDays').innerHTML = '';
+  const br = (lbl, a, n, c) => `<div class="br"><span>${lbl}</span><b>${a}/${n}</b>${meter(a, n, c)}</div>`;
+  $('#dSports').innerHTML = Object.keys(SP).map(s => {
+    const list = base.filter(e => e.s === s); if (!list.length) return '';
+    const r = tally(list), nx = nextFor(list), fin = list.filter(e => e.k === 'final' || e.k === 'award').pop();
+    return `<div class="dc" style="--sc:${SC[s]}"><div class="hdr sp-h"><span class="dot"></span><div><h4>${esc(SP[s])}</h4><p class="vn">${[...new Set(list.map(e => e.v))].map(v => esc(VN[v])).join(' · ')}</p></div>${pair(s)}</div>
+<div class="big"><b>${r.n}</b><span>slot${r.nt ? ' · ' + r.nt + ' ada nota' : ''}</span></div>
+${br('Ada petugas', r.a, r.n, '--c-crew')}${br('Gambar di Drive', r.dr, r.n, '--c-drive')}${br('Publisiti', r.pb, r.n, '--c-pub')}
+<div class="foot"><span>${fin ? 'Akhir/hadiah: ' + DAYS[fin.d].s + ' ' + fin.d + ' Dis ' + fin.t0 : nx ? 'Seterusnya: ' + DAYS[nx.d].s + ' ' + nx.d + ' Dis ' + nx.t0 : 'Selesai'}</span><button type="button" data-go-sport="${s}">Lihat jadual</button></div></div>`;
+  }).join('') || '<p class="note">Tiada slot untuk hari ini.</p>';
+  const ids = sortedP();
+  $('#dCrew').innerHTML = ids.length ? ids.map(id => {
+    const p = P[id], list = base.filter(e => crewOf(e.id).includes(id)), r = tally(list), nx = nextFor(list);
+    const per = [1, 2, 3, 4, 5].map(d => [d, list.filter(e => e.d === d).length]).filter(x => x[1]);
+    return `<div class="dc"><div class="hdr">${av(p, 48)}<div><h4>${esc(p.nama || 'Petugas')}</h4><div class="role">${esc(p.peranan || '')}</div></div></div>
+<div class="big"><b>${r.n}</b><span>slot ditetapkan</span></div>
+${r.n ? br('Gambar di Drive', r.dr, r.n, '--c-drive') + br('Publisiti', r.pb, r.n, '--c-pub') : '<p class="note">Belum ditetapkan pada mana-mana slot' + (st.day ? ' hari ini' : '') + '.</p>'}
+${per.length && !st.day ? `<div class="dchips">${per.map(([d, n]) => `<span>${DAYS[d].s} ${d}: ${n}</span>`).join('')}</div>` : ''}
+<div class="foot"><span>${nx ? 'Seterusnya: ' + DAYS[nx.d].s + ' ' + nx.t0 + ' · ' + esc(SP[nx.s]) : r.n ? 'Tiada slot akan datang' : ''}</span><button type="button" data-go-crew="${esc(id)}">Lihat jadual</button></div></div>`;
+  }).join('') : `<div class="pc empty" style="grid-column:1/-1;min-height:140px"><b>Belum ada petugas</b><span style="font-size:14px">Dashboard setiap petugas akan muncul di sini selepas admin mengisi senarai di tab Petugas.</span></div>`;
+}
+
+/* ---------- crew view ---------- */
+function renderCrew() {
+  if (view() !== 'petugas') return;
+  const ids = sortedP();
+  let h = ids.map(id => {
+    const p = P[id], n = EV.filter(e => crewOf(e.id).includes(id)).length, wa = waLink(p.telefon);
+    return `<div class="pc"><div class="who">${av(p, 64)}<div><h3>${esc(p.nama || 'Petugas')}</h3><div class="role">${esc(p.peranan || '')}</div></div></div>
+<p class="tel">${p.telefon ? esc(p.telefon) : '<span style="color:var(--mut)">Tiada no. telefon</span>'}</p>
+<div class="acts">${wa ? `<a href="${wa}" target="_blank" rel="noopener">WhatsApp</a>` : ''}<button type="button" data-act="view" data-p="${esc(id)}">Lihat tugasan (${n})</button>${isAdmin ? `<button type="button" data-act="editp" data-p="${esc(id)}">Sunting</button>` : ''}</div></div>`;
+  }).join('');
+  const empties = Math.max(0, 6 - ids.length);
+  for (let i = 0; i < empties; i++) h += `<div class="pc empty"><span class="sil"></span><b>Slot petugas kosong</b>${isAdmin ? '<button class="btn" type="button" data-act="newp">Isi slot ini</button>' : '<span style="font-size:14px">Akan diisi oleh admin</span>'}</div>`;
+  $('#pgrid').innerHTML = h;
+  $('#addP').hidden = !isAdmin;
+  $('#adminBtn').textContent = isAdmin ? 'Mod admin: aktif' : 'Mod admin';
+  $('#pNotice').textContent = dbState === 'wait' ? 'Memuatkan senarai petugas…' : dbState === 'err' ? 'Tidak dapat menghubungi pangkalan data. Senarai petugas akan muncul sebaik sambungan pulih.' : '';
+}
+
+function noticeJadual() {
+  $('#notice').textContent = dbState === 'err' ? 'Tidak dapat menghubungi pangkalan data — jadual tetap boleh dilihat, tetapi petugas dan status mungkin belum terkini.' : '';
+}
+function renderAll() { renderDays(); renderSports(); renderCrewFilter(); renderList(); renderDash(); renderCrew(); noticeJadual(); }
+
+/* ---------- views ---------- */
+function showView() {
+  const v = view();
+  ['jadual', 'dashboard', 'petugas'].forEach(x => { $('#v-' + x).hidden = x !== v; $('#t-' + x).toggleAttribute('aria-current', false); });
+  $('#t-' + v).setAttribute('aria-current', 'page');
+  $('#days').style.visibility = v === 'petugas' ? 'hidden' : 'visible';
+  renderAll();
+}
+
+/* ---------- writes ---------- */
+function failMsg(err) {
+  const c = err && err.code;
+  if (c === 'pin' || c === 'locked') { pin = ''; isAdmin = false; store.set('pin', null); renderAll(); return c === 'locked' ? 'Terlalu banyak cubaan PIN. Cuba lagi selepas 10 minit.' : 'PIN admin tidak sah. Sila masuk semula mod admin.'; }
+  if (c === 'busy') return 'Pelayan sibuk. Cuba lagi sebentar.';
+  return 'Gagal menyimpan. Semak sambungan internet dan cuba lagi.';
+}
+let pendingAfter = null;
+function askMe(then) { pendingAfter = then || null; openMe(); }
+function toggleItem(eid, k, on) {
+  if (!me) { askMe(() => toggleItem(eid, k, on)); refreshCard(eid); return; }
+  const e = EV.find(x => x.id === eid);
+  const before = itemsOf(eid)[k] || null;
+  const val = on ? {by: me, at: nowStr()} : null;
+  const cur = Object.assign({}, C[eid] || {}); cur.items = Object.assign({}, itemsOf(eid)); cur.items[k] = val; C[eid] = cur;
+  refreshCard(eid);
+  pending++;
+  api({a: 'tick', slot: eid, key: k, on, by: me, label: label(e)})
+    .then(() => { pending--; rev = ''; pull(); })
+    .catch(err => { pending--; const c2 = Object.assign({}, C[eid]); c2.items = Object.assign({}, c2.items); c2.items[k] = before; C[eid] = c2; refreshCard(eid); toast(failMsg(err)); });
+}
+const noteTimers = {};
+function queueNote(eid, immediate) {
+  clearTimeout(noteTimers[eid]);
+  const run = () => {
+    const txt = drafts[eid]; if (txt === undefined) return;
+    const prevN = notaOf(eid);
+    if ((prevN ? prevN.t : '') === txt) { delete drafts[eid]; return; }
+    if (!me) { askMe(() => queueNote(eid, true)); return; }
+    const e = EV.find(x => x.id === eid);
+    const stat = document.querySelector(`.ev[data-id="${eid}"] [data-nstat]`); if (stat) stat.textContent = 'Menyimpan…';
+    pending++;
+    api({a: 'nota', slot: eid, t: txt, by: me, label: label(e)}).then(() => {
+      pending--;
+      const cur = Object.assign({}, C[eid] || {items: {}}); cur.nota = txt ? {t: txt, by: me, at: nowStr()} : null; C[eid] = cur;
+      if (drafts[eid] === txt) delete drafts[eid];
+      const s2 = document.querySelector(`.ev[data-id="${eid}"] [data-nstat]`); if (s2) s2.textContent = 'Disimpan · ' + nowStr();
+      rev = ''; pull();
+    }).catch(err => { pending--; const s3 = document.querySelector(`.ev[data-id="${eid}"] [data-nstat]`); if (s3) s3.textContent = 'Belum disimpan — akan dicuba semula'; toast(failMsg(err)); });
+  };
+  if (immediate) run(); else noteTimers[eid] = setTimeout(run, 1500);
+}
+
+/* ---------- dialogs ---------- */
+function openMe() {
+  const ids = sortedP();
+  $('#fMeSel').innerHTML = '<option value="">— Pilih nama —</option>' + ids.map(id => `<option value="${esc(P[id].nama)}">${esc(P[id].nama)}</option>`).join('');
+  const inList = ids.some(id => P[id].nama === me);
+  $('#fMeSel').value = inList ? me : '';
+  $('#fMeTxt').value = inList ? '' : me;
+  $('#fMeSel').closest('label').hidden = !ids.length;
+  $('#fMeErr').textContent = '';
+  $('#dMe').showModal();
+}
+function saveMe(ev) {
+  ev.preventDefault();
+  const v = ($('#fMeTxt').value.trim() || $('#fMeSel').value).slice(0, 60);
+  if (!v) { $('#fMeErr').textContent = 'Sila pilih atau tulis nama anda.'; return; }
+  me = v; store.set('me', me); $('#dMe').close(); renderCrewFilter(); toast('Nama disimpan: ' + me);
+  const f = pendingAfter; pendingAfter = null; if (f) f();
+}
+function openPin() {
+  $('#fPinIn').value = ''; $('#fPinErr').textContent = '';
+  $('#fPinOut').hidden = !isAdmin; $('#fPinGo').hidden = isAdmin; $('#fPinIn').closest('label').hidden = isAdmin;
+  $('#fPinNote').textContent = isAdmin ? 'Mod admin aktif pada peranti ini.' : 'Masukkan PIN admin untuk mengisi petugas dan menetapkan tugasan.';
+  $('#dPin').showModal();
+}
+async function savePin(ev) {
+  ev.preventDefault();
+  const v = $('#fPinIn').value.trim(); if (!v) return;
+  $('#fPinGo').disabled = true;
+  try {
+    await api({a: 'pin', pin: v});
+    pin = v; isAdmin = true; store.set('pin', pin); $('#dPin').close(); renderAll(); toast('Mod admin aktif');
+  } catch (err) {
+    $('#fPinErr').textContent = err && err.code === 'locked' ? 'Terlalu banyak cubaan. Cuba lagi selepas 10 minit.' : 'PIN tidak betul.';
+  }
+  $('#fPinGo').disabled = false;
+}
+let editing = null, pickedFile = null, assigning = null, delArmed = false;
+function openP(id) {
+  editing = id || null; pickedFile = null; delArmed = false;
+  const p = id ? P[id] : {};
+  $('#fPh').textContent = id ? 'Sunting petugas' : 'Tambah petugas';
+  $('#fPnama').value = p.nama || ''; $('#fPtel').value = p.telefon || '';
+  $('#fProle').value = p.peranan || 'Jurugambar';
+  $('#fPprev').innerHTML = av(p, 72);
+  $('#fPfile').value = '';
+  $('#fPerr').textContent = '';
+  $('#fPdel').hidden = !id; $('#fPdel').textContent = 'Padam';
+  $('#fPsave').disabled = false;
+  $('#dP').showModal();
+}
+async function shrink(file) {
+  const bmp = await createImageBitmap(file);
+  const side = Math.min(bmp.width, bmp.height), sx = (bmp.width - side) / 2, sy = (bmp.height - side) / 2;
+  const c = document.createElement('canvas'); c.width = c.height = 200;
+  c.getContext('2d').drawImage(bmp, sx, sy, side, side, 0, 0, 200, 200);
+  for (const q of [0.82, 0.7, 0.55, 0.4]) { const u = c.toDataURL('image/jpeg', q); if (u.length < 46000) return u; }
+  return '';
+}
+async function saveP(ev) {
+  ev.preventDefault();
+  const nama = $('#fPnama').value.trim();
+  if (!nama) { $('#fPerr').textContent = 'Sila isi nama petugas.'; return; }
+  $('#fPsave').disabled = true; $('#fPerr').textContent = '';
+  const pid = editing || ('p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
+  const prevP = P[pid] || {};
+  try {
+    const foto = pickedFile ? await shrink(pickedFile) : '';
+    const body = {id: pid, nama, telefon: $('#fPtel').value.trim(), peranan: $('#fProle').value, urutan: prevP.urutan || Date.now(), foto, keepFoto: !pickedFile};
+    await api({a: 'savePetugas', pin, p: body});
+    P[pid] = Object.assign({}, body, {foto: foto || prevP.foto || ''});
+    $('#dP').close(); renderAll(); toast(editing ? 'Petugas dikemas kini' : 'Petugas ditambah');
+    prev = ''; pull();
+  } catch (err) { $('#fPerr').textContent = failMsg(err); $('#fPsave').disabled = false; }
+}
+async function delP() {
+  if (!editing) return;
+  if (!delArmed) { delArmed = true; $('#fPdel').textContent = 'Sahkan padam'; return; }
+  $('#fPdel').disabled = true;
+  try {
+    await api({a: 'delPetugas', pin, id: editing});
+    delete P[editing]; if (st.crew === editing) st.crew = '';
+    $('#dP').close(); renderAll(); toast('Petugas dipadam');
+    prev = ''; rev = ''; pull();
+  } catch (e) { $('#fPerr').textContent = failMsg(e); }
+  $('#fPdel').disabled = false;
+}
+function openA(eid) {
+  const e = EV.find(x => x.id === eid); if (!e) return;
+  assigning = e;
+  const ids = sortedP(), cur = crewOf(eid);
+  const same = EV.filter(x => x.d === e.d && x.s === e.s);
+  $('#fAwhat').textContent = `${SP[e.s]} · ${e.ti} · ${DAYS[e.d].h} ${e.d} Dis, ${e.t0}–${e.t1}`;
+  $('#fAlist').innerHTML = ids.length ? ids.map(id => `<label><input type="checkbox" value="${esc(id)}"${cur.includes(id) ? ' checked' : ''}>${av(P[id], 32)}<span><b>${esc(P[id].nama || 'Petugas')}</b><br><span class="note">${esc(P[id].peranan || '')}</span></span></label>`).join('') : '<p class="note">Belum ada petugas. Tambah petugas di tab Petugas dahulu.</p>';
+  $('#fAall').checked = false;
+  $('#fAallL').textContent = `Guna untuk semua ${same.length} slot ${SP[e.s]} pada ${DAYS[e.d].h} ${e.d} Dis`;
+  $('#fAall').closest('label').hidden = same.length < 2 || !ids.length;
+  $('#fAerr').textContent = ''; $('#fAsave').disabled = !ids.length;
+  $('#dA').showModal();
+}
+async function saveA(ev) {
+  ev.preventDefault();
+  const e = assigning; if (!e) return;
+  const sel = [...document.querySelectorAll('#fAlist input:checked')].map(i => i.value).filter(id => P[id]);
+  const targets = $('#fAall').checked ? EV.filter(x => x.d === e.d && x.s === e.s) : [e];
+  $('#fAsave').disabled = true; $('#fAsave').textContent = 'Menyimpan…';
+  try {
+    await api({a: 'assign', pin, slots: targets.map(x => x.id), ids: sel, labels: targets.map(label)});
+    targets.forEach(x => { T[x.id] = sel; });
+    $('#dA').close(); renderAll(); toast('Tugasan disimpan');
+    rev = ''; pull();
+  } catch (err) { $('#fAerr').textContent = failMsg(err); }
+  $('#fAsave').disabled = false; $('#fAsave').textContent = 'Simpan';
+}
+
+/* ---------- copy summary ---------- */
+function summary() {
+  const list = visible();
+  let out = 'JADUAL LIPUTAN SURYA 2026', d0 = 0;
+  list.forEach(e => {
+    if (e.d !== d0) { out += `\n\n*${DAYS[e.d].h.toUpperCase()}, ${e.d} DIS 2026*`; d0 = e.d; }
+    const crew = crewOf(e.id).map(p => P[p].nama).filter(Boolean);
+    out += `\n${e.t0}–${e.t1} | ${SP[e.s]}${e.no ? ' ' + e.no : ''}: ${e.ti} @ ${short(e.v)}${crew.length ? ' — ' + crew.join(', ') : ''}`;
+  });
+  return out + '\n\n' + location.href.split('#')[0];
+}
+
+/* ---------- events ---------- */
+$('#days').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-day]'); if (!b) return;
+  st.day = +b.dataset.day; persist(); renderDays(); renderSports(); renderList(); renderDash();
+});
+$('#sports').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-sport]'); if (!b) return;
+  st.sport = b.dataset.sport; persist(); renderSports(); renderList();
+});
+$('#fCrew').addEventListener('change', ev => { st.crew = ev.target.value; persist(); renderList(); });
+$('#fPrep').addEventListener('change', ev => { st.hidePrep = ev.target.checked; persist(); renderList(); });
+$('#meBtn').addEventListener('click', () => askMe(null));
+$('#adminBtn').addEventListener('click', openPin);
+$('#fMe').addEventListener('submit', saveMe);
+$('#fMeSel').addEventListener('change', () => { if ($('#fMeSel').value) $('#fMeTxt').value = ''; });
+$('#fPin').addEventListener('submit', savePin);
+$('#fPinOut').addEventListener('click', () => { pin = ''; isAdmin = false; store.set('pin', null); $('#dPin').close(); renderAll(); toast('Keluar mod admin'); });
+$('#list').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-act]'); if (!b) return;
+  const id = b.closest('.ev').dataset.id;
+  if (b.dataset.act === 'ck') {
+    if (open.has(id)) { open.delete(id); if (drafts[id] !== undefined) queueNote(id, true); } else open.add(id);
+    refreshCard(id);
+  } else if (b.dataset.act === 'assign') openA(id);
+});
+$('#list').addEventListener('change', ev => {
+  const i = ev.target.closest('input[data-k]'); if (!i || dbState !== 'ok') return;
+  toggleItem(i.closest('.ev').dataset.id, i.dataset.k, i.checked);
+});
+$('#list').addEventListener('input', ev => {
+  const t = ev.target.closest('textarea[data-note]'); if (!t || dbState !== 'ok') return;
+  const id = t.closest('.ev').dataset.id; drafts[id] = t.value; queueNote(id, false);
+});
+$('#list').addEventListener('focusout', ev => {
+  const t = ev.target.closest('textarea[data-note]'); if (!t) return;
+  const id = t.closest('.ev').dataset.id; if (drafts[id] !== undefined) queueNote(id, true);
+});
+$('#v-dashboard').addEventListener('click', ev => {
+  const s = ev.target.closest('[data-go-sport]'), c = ev.target.closest('[data-go-crew]');
+  if (s) { st.sport = s.dataset.goSport; st.crew = ''; }
+  else if (c) { st.crew = c.dataset.goCrew; st.sport = ''; }
+  else return;
+  persist(); location.hash = '#jadual';
+});
+$('#pgrid').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act;
+  if (a === 'newp') openP(null);
+  else if (a === 'editp') openP(b.dataset.p);
+  else if (a === 'view') { st.crew = b.dataset.p; st.sport = ''; st.day = 0; persist(); location.hash = '#jadual'; }
+});
+$('#addP').addEventListener('click', () => openP(null));
+$('#fPfile').addEventListener('change', ev => {
+  const f = ev.target.files && ev.target.files[0]; if (!f) return;
+  pickedFile = f;
+  $('#fPprev').innerHTML = `<img class="av" src="${URL.createObjectURL(f)}" alt="" style="width:72px;height:72px">`;
+});
+$('#fP').addEventListener('submit', saveP);
+$('#fPdel').addEventListener('click', delP);
+$('#fA').addEventListener('submit', saveA);
+document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => b.closest('dialog').close()));
+$('#copyBtn').addEventListener('click', async () => {
+  const txt = summary();
+  try { await navigator.clipboard.writeText(txt); toast('Ringkasan disalin'); }
+  catch (e) { $('#fCtext').value = txt; $('#dC').showModal(); $('#fCtext').select(); }
+});
+window.addEventListener('hashchange', showView);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) pull(); });
+
+/* ---------- boot ---------- */
+$('#fPrep').checked = st.hidePrep;
+renderNow();
+showView();
+pull();
+setInterval(renderNow, 60000);
+setInterval(() => { if (!document.hidden) pull(); }, 20000);
+}
+</script>
+</body>
+</html>
