@@ -194,7 +194,25 @@ select,input[type=text],input[type=tel],input:not([type]){min-height:44px;font-s
 .pc.empty{border-style:dashed;background:var(--soft);align-items:center;justify-content:center;text-align:center;min-height:200px;color:var(--mut)}
 .sil{width:64px;height:64px;border-radius:50%;border:2px dashed var(--line)}
 /* dialogs */
-dialog{border:1px solid var(--line);border-radius:20px;padding:0;background:var(--card);color:var(--ink);width:min(520px,calc(100vw - 24px));max-height:calc(100dvh - 24px)}
+dialog{border:1px solid var(--line);border-radius:20px;padding:0;background:var(--card);color:var(--ink);width:min(520px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto}
+.avf{border:1px solid var(--line);border-radius:14px;padding:6px 12px 10px;margin:0;display:grid;gap:6px}
+.avf legend{font-size:14px;font-weight:600;padding:0 4px}
+.avr{display:grid!important;grid-template-columns:7.5em minmax(0,1fr);align-items:center;gap:8px!important;font-weight:500!important}
+.avr select{min-height:40px}
+.avs-ada{background:color-mix(in srgb,var(--c-drive) 18%,transparent)}
+.avs-pagi,.avs-petang{background:color-mix(in srgb,var(--c-pub) 22%,transparent)}
+.avs-tiada{background:color-mix(in srgb,var(--d2) 18%,transparent)}
+.avs-x{background:var(--soft);color:var(--mut)}
+.avchips{display:flex;flex-wrap:wrap;gap:4px}
+.avchips span{font-size:12.5px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.avtab{width:100%;border-collapse:separate;border-spacing:4px;min-width:620px}
+.avtab th{font-size:13px;color:var(--mut);font-weight:600;text-align:left;padding:4px 6px}
+.avtab td{padding:8px 10px;border-radius:10px;font-size:14px;font-weight:600;vertical-align:middle}
+.avtab td.nm{background:none;padding-left:0;font-weight:700;white-space:nowrap}
+.avtab td small{display:block;font-weight:500;font-size:12.5px;color:var(--mut)}
+.avb{display:inline-block;font-size:12.5px;font-weight:700;padding:2px 8px;border-radius:999px;margin-top:2px}
+.clash{display:block;font-size:12.5px;color:var(--d2);font-weight:600}
+.plist label>span:not(.av){flex:1}
 dialog::backdrop{background:rgb(20 8 10/.55)}
 dialog form{padding:22px;display:grid;gap:14px}
 dialog h2{margin:0;font:700 20px/1.2 var(--hf)}
@@ -305,6 +323,7 @@ footer ul{margin:6px 0 0;padding-left:20px}
    </div>
    <div class="notice" id="pNotice"></div>
    <div class="pgrid" id="pgrid" style="margin-top:14px"></div>
+   <div class="dsec" id="pAvail"></div>
   </div>
  </section>
 </main>
@@ -328,7 +347,8 @@ footer ul{margin:6px 0 0;padding-left:20px}
     <li>Tekan butang status pada setiap slot untuk melihat: (1) gambar telah dimuat naik di Drive, (2) publisiti telah dilaksanakan, dan (3) nota. Paparan dikemas kini sendiri setiap 20 saat.</li>
     <li>Status dan nota dikemas kini oleh admin sahaja (perlu PIN). Dalam mod admin, pilih "Nama saya" sekali supaya setiap tanda direkodkan dengan nama.</li>
     <li>Tab Dashboard menunjukkan kemajuan ikut hari, ikut sukan dan ikut petugas.</li>
-    <li>Admin tekan "Mod admin" di tab Petugas dan masukkan PIN, kemudian tanda status, isi nama, telefon dan gambar petugas, serta tetapkan petugas melalui butang "Tetapkan" pada setiap slot.</li>
+    <li>Admin tekan "Mod admin" di tab Petugas dan masukkan PIN, kemudian tanda status, isi nama, telefon, gambar dan ketersediaan petugas (1–5 Dis), serta tetapkan petugas melalui butang "Tetapkan" pada setiap slot.</li>
+    <li>Semasa menetapkan petugas, setiap nama ditanda Available / Sebahagian masa / Tidak available ikut masa slot itu, dan diberi amaran jika bertembung dengan slot lain yang sudah ditetapkan.</li>
     <li>Semua status dan senarai petugas disimpan dalam Google Sheet pasukan (SURYA 2026 – Data Website Liputan).</li>
    </ul>
   </details>
@@ -343,6 +363,7 @@ footer ul{margin:6px 0 0;padding-left:20px}
  <label>Peranan<select id="fProle">
   <option>Jurugambar</option><option>Jurukamera video</option><option>Penulis berita</option><option>Operator drone</option><option>Media sosial / posting</option><option>Penyelaras liputan</option><option>Lain-lain</option>
  </select></label>
+ <fieldset class="avf"><legend>Ketersediaan 1–5 Disember</legend><div id="fPavail"></div></fieldset>
  <p class="err" id="fPerr"></p>
  <div class="dacts"><button type="button" class="ghost danger sp-l" id="fPdel" hidden>Padam</button><button type="button" class="ghost" data-close>Batal</button><button type="submit" class="pri" id="fPsave">Simpan</button></div>
 </form></dialog>
@@ -461,6 +482,21 @@ function av(p, sz) {
 const crewOf = id => (Array.isArray(T[id]) ? T[id] : []).filter(p => P[p]);
 const itemsOf = id => (C[id] && C[id].items) || {};
 const notaOf = id => (C[id] && C[id].nota && typeof C[id].nota.t === 'string') ? C[id].nota : null;
+const AVO = [['', 'Belum pasti'], ['ada', 'Ada (sepanjang hari)'], ['pagi', 'Pagi sahaja (sebelum 1 ptg)'], ['petang', 'Petang & malam sahaja'], ['tiada', 'Tidak available']];
+const AVS = {ada: 'Ada', pagi: 'Pagi', petang: 'Ptg/mlm', tiada: 'Tiada', '': '—'};
+function parseAvail(str) { const o = {}; String(str || '').split(';').forEach(x => { const m = x.match(/^([1-5])=(ada|pagi|petang|tiada)$/); if (m) o[m[1]] = m[2]; }); return o; }
+const availOf = (pid, d) => (P[pid] && parseAvail(P[pid].avail)[d]) || '';
+function fit(e, v) {
+  if (!v) return 'x'; if (v === 'ada') return 'ok'; if (v === 'tiada') return 'no';
+  const a = mins(e.t0), b = mins(e.t1);
+  if (v === 'pagi') return a < 780 ? (b <= 780 ? 'ok' : 'part') : 'no';
+  return b > 780 ? (a >= 780 ? 'ok' : 'part') : 'no';
+}
+const FITL = {ok: ['Available', 'avs-ada'], part: ['Sebahagian masa', 'avs-pagi'], no: ['Tidak available', 'avs-tiada'], x: ['Ketersediaan belum diisi', 'avs-x']};
+function clashes(pid, e) {
+  const a = mins(e.t0), b = mins(e.t1);
+  return EV.filter(o => o.id !== e.id && o.d === e.d && mins(o.t0) < b && a < mins(o.t1) && crewOf(o.id).includes(pid));
+}
 const sortedP = () => Object.keys(P).sort((a, b) => (P[a].urutan || 0) - (P[b].urutan || 0) || String(P[a].nama).localeCompare(String(P[b].nama)));
 function waLink(tel) {
   let d = String(tel || '').replace(/\D/g, '');
@@ -637,7 +673,7 @@ ${br('Ada petugas', r.a, r.n, '--c-crew')}${br('Gambar di Drive', r.dr, r.n, '--
     return `<div class="dc"><div class="hdr">${av(p, 48)}<div><h4>${esc(p.nama || 'Petugas')}</h4><div class="role">${esc(p.peranan || '')}</div></div></div>
 <div class="big"><b>${r.n}</b><span>slot ditetapkan</span></div>
 ${r.n ? br('Gambar di Drive', r.dr, r.n, '--c-drive') + br('Publisiti', r.pb, r.n, '--c-pub') : '<p class="note">Belum ditetapkan pada mana-mana slot' + (st.day ? ' hari ini' : '') + '.</p>'}
-${per.length && !st.day ? `<div class="dchips">${per.map(([d, n]) => `<span>${DAYS[d].s} ${d}: ${n}</span>`).join('')}</div>` : ''}
+${!st.day ? `<div class="avchips">${[1, 2, 3, 4, 5].map(d => { const v = availOf(id, d), n = list.filter(e => e.d === d).length; return `<span class="avs-${v || 'x'}" title="${esc(AVS[v])}">${DAYS[d].s} ${d}: ${n} slot</span>`; }).join('')}</div>` : `<div class="avchips"><span class="avs-${availOf(id, st.day) || 'x'}">${DAYS[st.day].s} ${st.day}: ${esc(AVS[availOf(id, st.day)])}</span></div>`}
 <div class="foot"><span>${nx ? 'Seterusnya: ' + DAYS[nx.d].s + ' ' + nx.t0 + ' · ' + esc(SP[nx.s]) : r.n ? 'Tiada slot akan datang' : ''}</span><button type="button" data-go-crew="${esc(id)}">Lihat jadual</button></div></div>`;
   }).join('') : `<div class="pc empty" style="grid-column:1/-1;min-height:140px"><b>Belum ada petugas</b><span style="font-size:14px">Dashboard setiap petugas akan muncul di sini selepas admin mengisi senarai di tab Petugas.</span></div>`;
 }
@@ -650,11 +686,13 @@ function renderCrew() {
     const p = P[id], n = EV.filter(e => crewOf(e.id).includes(id)).length, wa = waLink(p.telefon);
     return `<div class="pc"><div class="who">${av(p, 64)}<div><h3>${esc(p.nama || 'Petugas')}</h3><div class="role">${esc(p.peranan || '')}</div></div></div>
 <p class="tel">${p.telefon ? esc(p.telefon) : '<span style="color:var(--mut)">Tiada no. telefon</span>'}</p>
+<div class="avchips">${[1, 2, 3, 4, 5].map(d => { const v = availOf(id, d); return `<span class="avs-${v || 'x'}">${DAYS[d].s} ${d}: ${AVS[v]}</span>`; }).join('')}</div>
 <div class="acts">${wa ? `<a href="${wa}" target="_blank" rel="noopener">WhatsApp</a>` : ''}<button type="button" data-act="view" data-p="${esc(id)}">Lihat tugasan (${n})</button>${isAdmin ? `<button type="button" data-act="editp" data-p="${esc(id)}">Sunting</button>` : ''}</div></div>`;
   }).join('');
   const empties = Math.max(0, 6 - ids.length);
   for (let i = 0; i < empties; i++) h += `<div class="pc empty"><span class="sil"></span><b>Slot petugas kosong</b>${isAdmin ? '<button class="btn" type="button" data-act="newp">Isi slot ini</button>' : '<span style="font-size:14px">Akan diisi oleh admin</span>'}</div>`;
   $('#pgrid').innerHTML = h;
+  $('#pAvail').innerHTML = ids.length ? `<h3>Ketersediaan petugas</h3><p>Ringkasan setiap hari: status ketersediaan dan bilangan slot yang sudah ditetapkan. Kemas kini melalui butang Sunting${isAdmin ? '' : ' (mod admin)'}.</p><div class="scroll"><table class="avtab"><thead><tr><th>Petugas</th>${[1, 2, 3, 4, 5].map(d => `<th>${DAYS[d].h} ${d}</th>`).join('')}</tr></thead><tbody>${ids.map(id => `<tr><td class="nm">${esc(P[id].nama || 'Petugas')}</td>${[1, 2, 3, 4, 5].map(d => { const v = availOf(id, d), n = EV.filter(e => e.d === d && crewOf(e.id).includes(id)).length; return `<td class="avs-${v || 'x'}">${AVS[v]}<small>${n ? n + ' slot' : 'tiada slot'}</small></td>`; }).join('')}</tr>`).join('')}</tbody></table></div>` : '';
   $('#addP').hidden = !isAdmin;
   $('#adminBtn').textContent = isAdmin ? 'Mod admin: aktif' : 'Mod admin';
   $('#pNotice').textContent = dbState === 'wait' ? 'Memuatkan senarai petugas…' : dbState === 'err' ? 'Tidak dapat menghubungi pangkalan data. Senarai petugas akan muncul sebaik sambungan pulih.' : '';
@@ -762,6 +800,8 @@ function openP(id) {
   $('#fPh').textContent = id ? 'Sunting petugas' : 'Tambah petugas';
   $('#fPnama').value = p.nama || ''; $('#fPtel').value = p.telefon || '';
   $('#fProle').value = p.peranan || 'Jurugambar';
+  const avl = parseAvail(p.avail);
+  $('#fPavail').innerHTML = [1, 2, 3, 4, 5].map(d => `<label class="avr"><span>${DAYS[d].s} ${d} Dis</span><select data-d="${d}">${AVO.map(([v, l]) => `<option value="${v}"${(avl[d] || '') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></label>`).join('');
   $('#fPprev').innerHTML = av(p, 72);
   $('#fPfile').value = '';
   $('#fPerr').textContent = '';
@@ -786,7 +826,8 @@ async function saveP(ev) {
   const prevP = P[pid] || {};
   try {
     const foto = pickedFile ? await shrink(pickedFile) : '';
-    const body = {id: pid, nama, telefon: $('#fPtel').value.trim(), peranan: $('#fProle').value, urutan: prevP.urutan || Date.now(), foto, keepFoto: !pickedFile};
+    const avail = [...document.querySelectorAll('#fPavail select')].filter(x => x.value).map(x => x.dataset.d + '=' + x.value).join(';');
+    const body = {id: pid, nama, telefon: $('#fPtel').value.trim(), peranan: $('#fProle').value, urutan: prevP.urutan || Date.now(), foto, keepFoto: !pickedFile, avail};
     await api({a: 'savePetugas', pin, p: body});
     P[pid] = Object.assign({}, body, {foto: foto || prevP.foto || ''});
     $('#dP').close(); renderAll(); toast(editing ? 'Petugas dikemas kini' : 'Petugas ditambah');
@@ -811,7 +852,9 @@ function openA(eid) {
   const ids = sortedP(), cur = crewOf(eid);
   const same = EV.filter(x => x.d === e.d && x.s === e.s);
   $('#fAwhat').textContent = `${SP[e.s]} · ${e.ti} · ${DAYS[e.d].h} ${e.d} Dis, ${e.t0}–${e.t1}`;
-  $('#fAlist').innerHTML = ids.length ? ids.map(id => `<label><input type="checkbox" value="${esc(id)}"${cur.includes(id) ? ' checked' : ''}>${av(P[id], 32)}<span><b>${esc(P[id].nama || 'Petugas')}</b><br><span class="note">${esc(P[id].peranan || '')}</span></span></label>`).join('') : '<p class="note">Belum ada petugas. Tambah petugas di tab Petugas dahulu.</p>';
+  const rank = {ok: 0, x: 1, part: 2, no: 3};
+  const rows = ids.map(id => ({id, f: fit(e, availOf(id, e.d)), c: clashes(id, e)})).sort((a, b) => (rank[a.f] + (a.c.length ? 0.5 : 0)) - (rank[b.f] + (b.c.length ? 0.5 : 0)));
+  $('#fAlist').innerHTML = ids.length ? rows.map(({id, f, c}) => `<label><input type="checkbox" value="${esc(id)}"${cur.includes(id) ? ' checked' : ''}>${av(P[id], 32)}<span><b>${esc(P[id].nama || 'Petugas')}</b> <span class="note">${esc(P[id].peranan || '')}</span><br><span class="avb ${FITL[f][1]}">${FITL[f][0]}${availOf(id, e.d) ? ' · ' + esc(AVS[availOf(id, e.d)]) : ''}</span>${c.length ? `<small class="clash">Bertembung: ${c.slice(0, 2).map(o => esc(SP[o.s] + ' ' + (o.no || '') + ' ' + o.t0 + '–' + o.t1)).join(', ')}${c.length > 2 ? ' +' + (c.length - 2) : ''}</small>` : ''}</span></label>`).join('') : '<p class="note">Belum ada petugas. Tambah petugas di tab Petugas dahulu.</p>';
   $('#fAall').checked = false;
   $('#fAallL').textContent = `Guna untuk semua ${same.length} slot ${SP[e.s]} pada ${DAYS[e.d].h} ${e.d} Dis`;
   $('#fAall').closest('label').hidden = same.length < 2 || !ids.length;

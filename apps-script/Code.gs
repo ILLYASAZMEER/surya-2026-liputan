@@ -12,7 +12,7 @@ const TZ = 'Asia/Kuching';
 const SLOT_RE = /^[\w-]{1,80}$/;
 const ID_RE = /^[\w-]{1,40}$/;
 const HEADERS = {
-  Petugas: ['id', 'nama', 'telefon', 'peranan', 'urutan', 'foto'],
+  Petugas: ['id', 'nama', 'telefon', 'peranan', 'urutan', 'foto', 'avail'],
   Tugasan: ['slot_id', 'slot', 'petugas_id', 'petugas_nama'],
   Status: ['slot_id', 'slot', 'drive', 'drive_oleh', 'drive_masa', 'publisiti', 'publisiti_oleh', 'publisiti_masa', 'nota', 'nota_oleh', 'nota_masa']
 };
@@ -83,7 +83,7 @@ function out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).set
 /* ---------------- read ---------------- */
 function petugasData_() {
   return rows_('Petugas').map(function (r) {
-    return { id: r.id, nama: r.nama, telefon: r.telefon, peranan: r.peranan, urutan: Number(r.urutan) || 0, foto: /^data:image\/(jpeg|png|webp);base64,/.test(r.foto) ? r.foto : '' };
+    return { id: r.id, nama: r.nama, telefon: r.telefon, peranan: r.peranan, urutan: Number(r.urutan) || 0, foto: /^data:image\/(jpeg|png|webp);base64,/.test(r.foto) ? r.foto : '', avail: r.avail || '' };
   });
 }
 function slotData_() {
@@ -143,7 +143,10 @@ function savePetugas_(p) {
   if (!p || !ID_RE.test(p.id)) throw new Error('bad');
   const foto = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(p.foto || '') && p.foto.length <= 48000 ? p.foto : '';
   const keep = p.keepFoto ? (rows_('Petugas').filter(function (r) { return r.id === p.id; })[0] || {}).foto || '' : '';
-  upsert_('Petugas', p.id, { nama: str_(p.nama, 80), telefon: str_(p.telefon, 20), peranan: str_(p.peranan, 40), urutan: String(Number(p.urutan) || Date.now()), foto: foto || keep });
+  const avail = /^([1-5]=(ada|pagi|petang|tiada)?;?){0,5}$/.test(p.avail || '') ? String(p.avail || '') : '';
+  const sh = sheet_('Petugas');
+  if (String(sh.getRange(1, 7).getValue()) !== 'avail') sh.getRange(1, 7).setValue('avail').setFontWeight('bold');
+  upsert_('Petugas', p.id, { nama: str_(p.nama, 80), telefon: str_(p.telefon, 20), peranan: str_(p.peranan, 40), urutan: String(Number(p.urutan) || Date.now()), foto: foto || keep, avail: avail });
   relabel_();
   bump_('PREV'); bump_('REV');
   return { ok: true };
