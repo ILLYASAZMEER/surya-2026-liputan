@@ -215,6 +215,9 @@ dialog{border:1px solid var(--line);border-radius:20px;padding:0;background:var(
 .plist label>span:not(.av){flex:1}
 .prb{flex:none;white-space:nowrap;display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;background:#c62828;color:#fff;font-weight:800;font-size:11.5px;letter-spacing:.04em}
 .ev.prio{border-color:#c62828;box-shadow:0 0 0 1px #c62828 inset}
+.lnk.prt{color:#c62828;border-color:color-mix(in srgb,#c62828 50%,var(--line))}
+.lnk.prt.on{background:#c62828;color:#fff;border-style:solid}
+.prt-t{color:#c62828}
 .ck li.prow{border-bottom:1px dashed var(--line)}
 .ck li.prow label{font-weight:600}
 .ck li.sub label{padding-left:22px;font-weight:500;font-size:14.5px}
@@ -369,7 +372,7 @@ footer ul{margin:6px 0 0;padding-left:20px}
    <summary>Cara guna</summary>
    <ul>
     <li>Pilih hari di bar atas dan pilih sukan — venue setiap sukan tertera di bawah namanya.</li>
-    <li>Tekan butang status pada setiap slot untuk melihat: (1) gambar telah dimuat naik di Drive, (2) publisiti telah dilaksanakan atau tidak memerlukan publisiti, dan (3) nota. Slot penting ditanda <b>PRIORITY</b> dan boleh ditapis dengan "PRIORITY sahaja". Paparan dikemas kini sendiri setiap 20 saat.</li>
+    <li>Tekan butang status pada setiap slot untuk melihat: (1) gambar telah dimuat naik di Drive, (2) publisiti telah dilaksanakan atau tidak memerlukan publisiti, dan (3) nota. Slot yang pasukan JKR Sarawak bertanding ditanda <b>PRIORITY</b> (wajib ada liputan) dan boleh ditapis dengan "PRIORITY sahaja". Dalam mod admin, tekan "☆ Priority" pada kad slot untuk menanda atau membuangnya. Paparan dikemas kini sendiri setiap 20 saat.</li>
     <li>Status dan nota dikemas kini oleh admin sahaja (perlu PIN). Dalam mod admin, pilih "Nama saya" sekali supaya setiap tanda direkodkan dengan nama.</li>
     <li>Tab Dashboard menunjukkan kemajuan ikut hari, ikut sukan dan ikut petugas.</li>
     <li>Admin tekan "Mod admin" di tab Petugas dan masukkan PIN, kemudian tanda status, isi nama, telefon, gambar dan ketersediaan petugas (1–5 Dis), serta tetapkan petugas melalui butang "Tetapkan" pada setiap slot.</li>
@@ -547,8 +550,8 @@ function visible() {
 }
 const scope = () => EV.filter(e => (!st.day || e.d === st.day) && !(st.hidePrep && e.k === 'prep'));
 function tally(list) {
-  const r = {n: list.length, a: 0, dr: 0, pb: 0, nt: 0, np: 0, pr: 0};
-  list.forEach(e => { const it = itemsOf(e.id); if (crewOf(e.id).length) r.a++; if (it.drive) r.dr++; if (it.tiada_publisiti) r.np++; else if (it.publisiti) r.pb++; if (it.priority) r.pr++; if (notaOf(e.id) && notaOf(e.id).t.trim()) r.nt++; });
+  const r = {n: list.length, a: 0, dr: 0, pb: 0, nt: 0, np: 0, pr: 0, pa: 0};
+  list.forEach(e => { const it = itemsOf(e.id); if (crewOf(e.id).length) r.a++; if (it.drive) r.dr++; if (it.tiada_publisiti) r.np++; else if (it.publisiti) r.pb++; if (it.priority) { r.pr++; if (!crewOf(e.id).length) r.pa++; } if (notaOf(e.id) && notaOf(e.id).t.trim()) r.nt++; });
   r.pn = r.n - r.np;
   return r;
 }
@@ -614,7 +617,7 @@ function card(e) {
 <h3>${esc(e.ti)}</h3>
 ${meta ? `<p class="meta">${meta}</p>` : ''}
 ${e.m.length ? `<ul class="ms">${e.m.map(x => `<li><span>${esc(x[0])}</span><b>${esc(x[1])}</b>${x[2] ? `<i>${esc(x[2])}</i>` : ''}</li>`).join('')}</ul>` : ''}
-<div class="ft"><div class="crew">${crew.length ? crew.map(p => `<span class="chip">${av(P[p], 24)}${esc(P[p].nama || 'Petugas')}</span>`).join('') : '<span class="none">Belum ada petugas</span>'}${isAdmin ? '<button class="lnk" type="button" data-act="assign">Tetapkan</button>' : ''}</div>
+<div class="ft"><div class="crew">${crew.length ? crew.map(p => `<span class="chip">${av(P[p], 24)}${esc(P[p].nama || 'Petugas')}</span>`).join('') : '<span class="none">Belum ada petugas</span>'}${isAdmin ? `<button class="lnk" type="button" data-act="assign">Tetapkan</button><button class="lnk prt${it.priority ? ' on' : ''}" type="button" data-act="prio" aria-pressed="${!!it.priority}" title="JKR Sarawak bertanding">${it.priority ? '★ PRIORITY' : '☆ Priority'}</button>` : ''}</div>
 <button class="ckb" type="button" data-act="ck" aria-expanded="${isOpen}" aria-label="Status liputan"><span class="st dr${it.drive ? ' on' : ''}">Drive</span>${it.tiada_publisiti ? '<span class="st na">Tiada publisiti</span>' : `<span class="st pb${it.publisiti ? ' on' : ''}">Publisiti</span>`}${hasNote ? '<span class="nt">+ Nota</span>' : ''}</button></div>
 ${isOpen ? ckHtml(e, it, nota) : ''}
 </article>`;
@@ -625,7 +628,7 @@ function ckHtml(e, it, nota) {
   const msg = dbState === 'wait' ? 'Memuatkan status pasukan…' : dbState === 'err' ? 'Tidak dapat menghubungi pangkalan data. Semak sambungan internet dan cuba lagi.' : !isAdmin ? 'Status dikemas kini oleh admin sahaja.' : (!me ? 'Pilih "Nama saya" dahulu supaya tanda anda direkodkan dengan nama.' : '');
   const txt = drafts[e.id] ?? (nota ? nota.t : '');
   const pv = it.priority;
-  return `<div class="ck">${msg ? `<p class="note">${msg}</p>` : ''}<ul><li class="prow"><label><input type="checkbox" data-k="priority"${pv ? ' checked' : ''}${dis}><span class="prb">PRIORITY</span><span>Tandakan slot ini sebagai keutamaan</span></label>${pv ? `<small>✓ ${esc(pv.by || 'Admin')}${pv.at ? ' · ' + esc(pv.at) : ''}</small>` : ''}</li>${ITEMS.map(([k, l, num]) => {
+  return `<div class="ck">${msg ? `<p class="note">${msg}</p>` : ''}<ul><li class="prow"><label><input type="checkbox" data-k="priority"${pv ? ' checked' : ''}${dis}><span class="prb">PRIORITY</span><span>Pasukan JKR Sarawak bertanding — wajib ada liputan</span></label>${pv ? `<small>✓ ${esc(pv.by || 'Admin')}${pv.at ? ' · ' + esc(pv.at) : ''}</small>` : ''}</li>${ITEMS.map(([k, l, num]) => {
     const v = it[k];
     return `<li${num ? '' : ' class="sub"'}><label><input type="checkbox" data-k="${k}"${v ? ' checked' : ''}${dis}><i${num ? '' : ' class="blank"'}>${num || '·'}</i><span>${esc(l)}</span></label>${v ? `<small>✓ ${esc(v.by || 'Ahli pasukan')}${v.at ? ' · ' + esc(v.at) : ''}</small>` : ''}</li>`;
   }).join('')}</ul>
@@ -675,7 +678,7 @@ function renderDash() {
   const base = scope(), t = tally(base);
   const where = st.day ? `${DAYS[st.day].h} ${st.day} Dis` : 'Keseluruhan';
   $('#dTitle').textContent = `${where}: ${t.dr} daripada ${t.n} slot sudah dimuat naik ke Drive`;
-  $('#dSub').textContent = `${t.pb} daripada ${t.pn} slot sudah dipublisitikan (${t.np} tidak memerlukan publisiti) · ${t.pr} slot PRIORITY · ${t.n - t.a} slot belum ada petugas · ${t.nt} slot ada nota${st.hidePrep ? ' · sesi persediaan tidak dikira' : ''}`;
+  $('#dSub').textContent = `${t.pb} daripada ${t.pn} slot sudah dipublisitikan (${t.np} tidak memerlukan publisiti) · ${t.pr} slot PRIORITY (JKR Sarawak bertanding)${t.pa ? ', ' + t.pa + ' belum ada petugas' : ''} · ${t.n - t.a} slot belum ada petugas · ${t.nt} slot ada nota${st.hidePrep ? ' · sesi persediaan tidak dikira' : ''}`;
   const tile = (lbl, a, n, c) => `<div class="tile"><span>${lbl}</span><b>${a}<small>/ ${n}</small></b>${meter(a, n, c)}</div>`;
   $('#dTiles').innerHTML = `<div class="tile"><span>Slot liputan</span><b>${t.n}</b><span style="font-weight:500">${t.n - base.filter(e => e.k === 'prep').length} perlawanan/majlis</span></div>`
     + tile('Ada petugas', t.a, t.n, '--c-crew') + tile('Gambar di Drive', t.dr, t.n, '--c-drive') + tile('Publisiti', t.pb, t.pn, '--c-pub');
@@ -694,7 +697,7 @@ function renderDash() {
     const list = base.filter(e => e.s === s); if (!list.length) return '';
     const r = tally(list), nx = nextFor(list), fin = list.filter(e => e.k === 'final' || e.k === 'award').pop();
     return `<div class="dc" style="--sc:${SC[s]}"><div class="hdr sp-h"><span class="dot"></span><div><h4>${esc(SP[s])}</h4><p class="vn">${[...new Set(list.map(e => e.v))].map(v => esc(VN[v])).join(' · ')}</p></div>${pair(s)}</div>
-<div class="big"><b>${r.n}</b><span>slot${r.pr ? ' · ' + r.pr + ' PRIORITY' : ''}${r.nt ? ' · ' + r.nt + ' ada nota' : ''}</span></div>
+<div class="big"><b>${r.n}</b><span>slot${r.pr ? ' · <b class="prt-t">' + r.pr + ' PRIORITY</b>' + (r.pa ? ' (' + r.pa + ' tiada petugas)' : '') : ''}${r.nt ? ' · ' + r.nt + ' ada nota' : ''}</span></div>
 ${br('Ada petugas', r.a, r.n, '--c-crew')}${br('Gambar di Drive', r.dr, r.n, '--c-drive')}${br('Publisiti' + (r.np ? ` <small>(${r.np} tidak perlu)</small>` : ''), r.pb, r.pn, '--c-pub')}
 <div class="foot"><span>${fin ? 'Akhir/hadiah: ' + DAYS[fin.d].s + ' ' + fin.d + ' Dis ' + fin.t0 : nx ? 'Seterusnya: ' + DAYS[nx.d].s + ' ' + nx.d + ' Dis ' + nx.t0 : 'Selesai'}</span><button type="button" data-go-sport="${s}">Lihat jadual</button></div></div>`;
   }).join('') || '<p class="note">Tiada slot untuk hari ini.</p>';
@@ -989,6 +992,7 @@ $('#list').addEventListener('click', ev => {
     if (open.has(id)) { open.delete(id); if (drafts[id] !== undefined) queueNote(id, true); } else open.add(id);
     refreshCard(id);
   } else if (b.dataset.act === 'assign') openA(id);
+  else if (b.dataset.act === 'prio') toggleItem(id, 'priority', !itemsOf(id).priority);
 });
 $('#list').addEventListener('change', ev => {
   const i = ev.target.closest('input[data-k]'); if (!i || dbState !== 'ok' || !isAdmin) return;
