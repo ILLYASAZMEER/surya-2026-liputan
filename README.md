@@ -3,7 +3,7 @@
 Website jadual liputan untuk Pasukan Coverage, Media Sosial JKR Sarawak, sepanjang Karnival Sukan JKR Se-Malaysia (SURYA 2026), 1–5 Disember 2026, Kuching & Kota Samarahan.
 
 - **Jadual:** 113 slot untuk 10 sukan dan 2 majlis rasmi, boleh ditapis ikut hari, sukan dan petugas.
-- **Status liputan setiap slot:** (1) gambar telah dimuatnaik di Drive, (2) publisiti telah dilaksanakan, (3) nota.
+- **Status liputan setiap slot:** (1) gambar telah dimuatnaik di Drive, (2) publisiti telah dilaksanakan / tidak memerlukan publisiti, (3) nota, serta tanda **PRIORITY** untuk slot keutamaan.
 - **Dashboard:** kemajuan ikut hari, ikut sukan dan ikut petugas.
 - **Petugas (25 orang):** nama, unit, telefon, kamera, gambar dan ketersediaan 1–5 Dis, diisi oleh admin (perlu PIN) terus dalam jadual di tab Petugas. Semasa menetapkan tugasan, setiap petugas ditanda Available / Sebahagian masa / Tidak available dan diberi amaran jika bertembung.
 - **Status & nota** hanya boleh dikemas kini oleh admin.

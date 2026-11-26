@@ -213,6 +213,15 @@ dialog{border:1px solid var(--line);border-radius:20px;padding:0;background:var(
 .avb{display:inline-block;font-size:12.5px;font-weight:700;padding:2px 8px;border-radius:999px;margin-top:2px}
 .clash{display:block;font-size:12.5px;color:var(--d2);font-weight:600}
 .plist label>span:not(.av){flex:1}
+.prb{flex:none;white-space:nowrap;display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;background:#c62828;color:#fff;font-weight:800;font-size:11.5px;letter-spacing:.04em}
+.ev.prio{border-color:#c62828;box-shadow:0 0 0 1px #c62828 inset}
+.ck li.prow{border-bottom:1px dashed var(--line)}
+.ck li.prow label{font-weight:600}
+.ck li.sub label{padding-left:22px;font-weight:500;font-size:14.5px}
+.ck li.sub label i{opacity:.5}
+.ckb .st.na{color:var(--mut);text-decoration:line-through;border-style:dashed}
+.ckb .st.na::before{display:none}
+.br small{font-weight:500;color:var(--mut)}
 .ptab{min-width:1080px}
 .ptab td.no{background:none;color:var(--mut);font-weight:600;width:2em;text-align:right;padding-right:2px}
 .ptab td.nm{min-width:15em;white-space:normal;position:sticky;left:0;background:var(--bg);z-index:1}
@@ -297,6 +306,7 @@ footer ul{margin:6px 0 0;padding-left:20px}
    <div class="filters">
     <label>Petugas<select id="fCrew"><option value="">Semua petugas</option></select></label>
     <label class="tog"><input type="checkbox" id="fPrep"> Sembunyikan sesi persediaan</label>
+    <label class="tog"><input type="checkbox" id="fPrio"> PRIORITY sahaja</label>
     <button class="btn me" id="meBtn" type="button">Nama saya: <b id="meName">belum dipilih</b></button>
     <button class="btn" id="copyBtn" type="button">Salin ringkasan untuk WhatsApp</button>
    </div>
@@ -359,7 +369,7 @@ footer ul{margin:6px 0 0;padding-left:20px}
    <summary>Cara guna</summary>
    <ul>
     <li>Pilih hari di bar atas dan pilih sukan — venue setiap sukan tertera di bawah namanya.</li>
-    <li>Tekan butang status pada setiap slot untuk melihat: (1) gambar telah dimuat naik di Drive, (2) publisiti telah dilaksanakan, dan (3) nota. Paparan dikemas kini sendiri setiap 20 saat.</li>
+    <li>Tekan butang status pada setiap slot untuk melihat: (1) gambar telah dimuat naik di Drive, (2) publisiti telah dilaksanakan atau tidak memerlukan publisiti, dan (3) nota. Slot penting ditanda <b>PRIORITY</b> dan boleh ditapis dengan "PRIORITY sahaja". Paparan dikemas kini sendiri setiap 20 saat.</li>
     <li>Status dan nota dikemas kini oleh admin sahaja (perlu PIN). Dalam mod admin, pilih "Nama saya" sekali supaya setiap tanda direkodkan dengan nama.</li>
     <li>Tab Dashboard menunjukkan kemajuan ikut hari, ikut sukan dan ikut petugas.</li>
     <li>Admin tekan "Mod admin" di tab Petugas dan masukkan PIN, kemudian tanda status, isi nama, telefon, gambar dan ketersediaan petugas (1–5 Dis), serta tetapkan petugas melalui butang "Tetapkan" pada setiap slot.</li>
@@ -429,7 +439,7 @@ const DATA = JSON.parse(document.getElementById('data').textContent);
 const EV = DATA.events, SP = DATA.sports, VN = DATA.venues;
 const DAYS = [null,{h:'Selasa',s:'Sel'},{h:'Rabu',s:'Rab'},{h:'Khamis',s:'Kha'},{h:'Jumaat',s:'Jum'},{h:'Sabtu',s:'Sab'}];
 const SC = {'bola-sepak':'#2e7d32','bola-tampar':'#ef6c00','bola-jaring':'#c2185b','badminton':'#1565c0','ping-pong':'#d32f2f','dart':'#795548','tenpin':'#6a3fb5','pickleball':'#00897b','golf':'#7c9a1e','esport':'#3949ab','majlis':'#c9971a'};
-const ITEMS = [['drive','Gambar telah dimuatnaik di Drive'],['publisiti','Publisiti telah dilaksanakan']];
+const ITEMS = [['drive','Gambar telah dimuatnaik di Drive', '1'],['publisiti','Publisiti telah dilaksanakan', '2'],['tiada_publisiti','Tidak memerlukan publisiti', '']];
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const mins = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
@@ -454,7 +464,7 @@ const nowK = () => {
 const liveDay = () => { const n = nowK(); return (n.y === 2026 && n.mo === 12 && n.d >= 1 && n.d <= 5) ? n.d : 0; };
 const nowKey = () => { const n = nowK(), t = n.y * 10000 + n.mo * 100 + n.d; return t < 20261201 ? -1 : t > 20261205 ? 1e9 : n.d * 1440 + n.min; };
 const saved = store.get('f', {});
-const st = {day: liveDay() || (Number.isInteger(saved.day) ? saved.day : 1), sport: SP[saved.sport] ? saved.sport : '', crew: saved.crew || '', hidePrep: !!saved.hidePrep};
+const st = {day: liveDay() || (Number.isInteger(saved.day) ? saved.day : 1), sport: SP[saved.sport] ? saved.sport : '', crew: saved.crew || '', hidePrep: !!saved.hidePrep, prio: !!saved.prio};
 const open = new Set(), drafts = {};
 let P = {}, T = {}, C = {};
 let me = store.get('me', '') || '', pin = store.get('pin', '') || '';
@@ -478,7 +488,7 @@ async function pull() {
     if (j.tugasan && !pending) {
       T = j.tugasan || {};
       const o = {};
-      Object.entries(j.status || {}).forEach(([id, v]) => { o[id] = {items: {drive: v.drive, publisiti: v.publisiti}, nota: v.nota}; });
+      Object.entries(j.status || {}).forEach(([id, v]) => { o[id] = {items: {drive: v.drive, publisiti: v.publisiti, tiada_publisiti: v.tiada_publisiti || null, priority: v.priority || null}, nota: v.nota}; });
       C = o; rev = j.rev;
     }
     const changed = dbState !== 'ok' || j.petugas || j.tugasan;
@@ -526,19 +536,20 @@ function waLink(tel) {
 const nowStr = () => new Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Kuching', day:'numeric', month:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit', hourCycle:'h23'}).format(new Date()).replace(',', '');
 let toastT;
 function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 2800); }
-const persist = () => store.set('f', {day: st.day, sport: st.sport, crew: st.crew, hidePrep: st.hidePrep});
+const persist = () => store.set('f', {day: st.day, sport: st.sport, crew: st.crew, hidePrep: st.hidePrep, prio: st.prio});
 const pct = (a, n) => n ? Math.round(a / n * 100) : 0;
 const meter = (a, n, c) => `<div class="meter" style="--p:${pct(a, n)}%;--bc:var(${c})"></div>`;
 const view = () => location.hash === '#petugas' ? 'petugas' : location.hash === '#dashboard' ? 'dashboard' : 'jadual';
 
 function visible() {
   return EV.filter(e => (!st.day || e.d === st.day) && (!st.sport || e.s === st.sport)
-    && (!st.crew || crewOf(e.id).includes(st.crew)) && !(st.hidePrep && e.k === 'prep'));
+    && (!st.crew || crewOf(e.id).includes(st.crew)) && !(st.hidePrep && e.k === 'prep') && (!st.prio || itemsOf(e.id).priority));
 }
 const scope = () => EV.filter(e => (!st.day || e.d === st.day) && !(st.hidePrep && e.k === 'prep'));
 function tally(list) {
-  const r = {n: list.length, a: 0, dr: 0, pb: 0, nt: 0};
-  list.forEach(e => { const it = itemsOf(e.id); if (crewOf(e.id).length) r.a++; if (it.drive) r.dr++; if (it.publisiti) r.pb++; if (notaOf(e.id) && notaOf(e.id).t.trim()) r.nt++; });
+  const r = {n: list.length, a: 0, dr: 0, pb: 0, nt: 0, np: 0, pr: 0};
+  list.forEach(e => { const it = itemsOf(e.id); if (crewOf(e.id).length) r.a++; if (it.drive) r.dr++; if (it.tiada_publisiti) r.np++; else if (it.publisiti) r.pb++; if (it.priority) r.pr++; if (notaOf(e.id) && notaOf(e.id).t.trim()) r.nt++; });
+  r.pn = r.n - r.np;
   return r;
 }
 
@@ -597,14 +608,14 @@ function card(e) {
   const badge = e.k === 'final' ? 'Akhir' : e.k === 'award' ? 'Hadiah' : e.k === 'majlis' ? 'Majlis' : '';
   const hasNote = (drafts[e.id] ?? (nota && nota.t) ?? '').trim();
   const meta = [e.st !== e.ti ? e.st : '', e.no, e.n].filter(Boolean).map(esc).join(' · ');
-  return `<article class="ev ${e.k}" data-id="${e.id}" style="--sc:${SC[e.s]}">
-<div class="eh"><div><div class="r1"><span class="sp">${esc(SP[e.s])}</span><span class="tt">${e.t0}–${e.t1}</span>${badge ? `<span class="fin">${badge}</span>` : ''}</div>
+  return `<article class="ev ${e.k}${it.priority ? ' prio' : ''}" data-id="${e.id}" style="--sc:${SC[e.s]}">
+<div class="eh"><div><div class="r1"><span class="sp">${esc(SP[e.s])}</span><span class="tt">${e.t0}–${e.t1}</span>${it.priority ? '<span class="prb">PRIORITY</span>' : ''}${badge ? `<span class="fin">${badge}</span>` : ''}</div>
 <p class="venue">${esc(VN[e.v])}</p></div><img class="mas" src="${MAS(e.s)[e.mi]}" alt="Maskot ${e.mi ? 'Mimi' : 'Belang'} — ${esc(SP[e.s])}" loading="lazy"></div>
 <h3>${esc(e.ti)}</h3>
 ${meta ? `<p class="meta">${meta}</p>` : ''}
 ${e.m.length ? `<ul class="ms">${e.m.map(x => `<li><span>${esc(x[0])}</span><b>${esc(x[1])}</b>${x[2] ? `<i>${esc(x[2])}</i>` : ''}</li>`).join('')}</ul>` : ''}
 <div class="ft"><div class="crew">${crew.length ? crew.map(p => `<span class="chip">${av(P[p], 24)}${esc(P[p].nama || 'Petugas')}</span>`).join('') : '<span class="none">Belum ada petugas</span>'}${isAdmin ? '<button class="lnk" type="button" data-act="assign">Tetapkan</button>' : ''}</div>
-<button class="ckb" type="button" data-act="ck" aria-expanded="${isOpen}" aria-label="Status liputan: ${done} daripada 2 selesai"><span class="st dr${it.drive ? ' on' : ''}">Drive</span><span class="st pb${it.publisiti ? ' on' : ''}">Publisiti</span>${hasNote ? '<span class="nt">+ Nota</span>' : ''}</button></div>
+<button class="ckb" type="button" data-act="ck" aria-expanded="${isOpen}" aria-label="Status liputan"><span class="st dr${it.drive ? ' on' : ''}">Drive</span>${it.tiada_publisiti ? '<span class="st na">Tiada publisiti</span>' : `<span class="st pb${it.publisiti ? ' on' : ''}">Publisiti</span>`}${hasNote ? '<span class="nt">+ Nota</span>' : ''}</button></div>
 ${isOpen ? ckHtml(e, it, nota) : ''}
 </article>`;
 }
@@ -613,9 +624,10 @@ function ckHtml(e, it, nota) {
   const dis = ro ? ' disabled' : '';
   const msg = dbState === 'wait' ? 'Memuatkan status pasukan…' : dbState === 'err' ? 'Tidak dapat menghubungi pangkalan data. Semak sambungan internet dan cuba lagi.' : !isAdmin ? 'Status dikemas kini oleh admin sahaja.' : (!me ? 'Pilih "Nama saya" dahulu supaya tanda anda direkodkan dengan nama.' : '');
   const txt = drafts[e.id] ?? (nota ? nota.t : '');
-  return `<div class="ck">${msg ? `<p class="note">${msg}</p>` : ''}<ul>${ITEMS.map(([k, l], i) => {
+  const pv = it.priority;
+  return `<div class="ck">${msg ? `<p class="note">${msg}</p>` : ''}<ul><li class="prow"><label><input type="checkbox" data-k="priority"${pv ? ' checked' : ''}${dis}><span class="prb">PRIORITY</span><span>Tandakan slot ini sebagai keutamaan</span></label>${pv ? `<small>✓ ${esc(pv.by || 'Admin')}${pv.at ? ' · ' + esc(pv.at) : ''}</small>` : ''}</li>${ITEMS.map(([k, l, num]) => {
     const v = it[k];
-    return `<li><label><input type="checkbox" data-k="${k}"${v ? ' checked' : ''}${dis}><i>${i + 1}</i><span>${esc(l)}</span></label>${v ? `<small>✓ ${esc(v.by || 'Ahli pasukan')}${v.at ? ' · ' + esc(v.at) : ''}</small>` : ''}</li>`;
+    return `<li${num ? '' : ' class="sub"'}><label><input type="checkbox" data-k="${k}"${v ? ' checked' : ''}${dis}><i${num ? '' : ' class="blank"'}>${num || '·'}</i><span>${esc(l)}</span></label>${v ? `<small>✓ ${esc(v.by || 'Ahli pasukan')}${v.at ? ' · ' + esc(v.at) : ''}</small>` : ''}</li>`;
   }).join('')}</ul>
 <label class="nota"><span><i>3</i>Nota</span><textarea data-note data-keep="n-${e.id}" maxlength="2000" placeholder="${ro ? 'Tiada nota' : 'Contoh: link folder Drive, keputusan perlawanan, nama VIP, isu di lapangan'}"${ro ? ' readonly' : ''}>${esc(txt)}</textarea><small data-nstat>${nota && nota.at ? 'Dikemas kini oleh ' + esc(nota.by || 'ahli pasukan') + ' · ' + esc(nota.at) : ''}</small></label></div>`;
 }
@@ -630,8 +642,9 @@ function renderList() {
   keepFocus(() => {
     const list = visible();
     const n = list.length, nPrep = list.filter(e => e.k === 'prep').length;
-    $('#count').textContent = n ? `${n} slot${st.day ? ' pada ' + DAYS[st.day].h + ' ' + st.day + ' Dis' : ''} · ${n - nPrep} perlawanan/majlis · ${nPrep} persediaan` : '';
-    if (!n) { $('#list').innerHTML = `<p class="empty-list">Tiada slot untuk tapisan ini.${st.crew ? ' Petugas ini belum ditetapkan pada mana-mana slot dalam tapisan ini.' : ''}</p>`; return; }
+    const nPr = list.filter(e => itemsOf(e.id).priority).length;
+    $('#count').textContent = n ? `${n} slot${st.day ? ' pada ' + DAYS[st.day].h + ' ' + st.day + ' Dis' : ''} · ${n - nPrep} perlawanan/majlis · ${nPrep} persediaan${nPr ? ' · ' + nPr + ' PRIORITY' : ''}` : '';
+    if (!n) { $('#list').innerHTML = `<p class="empty-list">Tiada slot untuk tapisan ini.${st.prio ? ' Belum ada slot ditanda PRIORITY.' : ''}${st.crew ? ' Petugas ini belum ditetapkan pada mana-mana slot dalam tapisan ini.' : ''}</p>`; return; }
     let h = '', lastD = 0, lastT = '';
     list.forEach(e => {
       if (e.d !== lastD) {
@@ -662,17 +675,17 @@ function renderDash() {
   const base = scope(), t = tally(base);
   const where = st.day ? `${DAYS[st.day].h} ${st.day} Dis` : 'Keseluruhan';
   $('#dTitle').textContent = `${where}: ${t.dr} daripada ${t.n} slot sudah dimuat naik ke Drive`;
-  $('#dSub').textContent = `${t.pb} slot sudah dipublisitikan · ${t.n - t.a} slot belum ada petugas · ${t.nt} slot ada nota${st.hidePrep ? ' · sesi persediaan tidak dikira' : ''}`;
+  $('#dSub').textContent = `${t.pb} daripada ${t.pn} slot sudah dipublisitikan (${t.np} tidak memerlukan publisiti) · ${t.pr} slot PRIORITY · ${t.n - t.a} slot belum ada petugas · ${t.nt} slot ada nota${st.hidePrep ? ' · sesi persediaan tidak dikira' : ''}`;
   const tile = (lbl, a, n, c) => `<div class="tile"><span>${lbl}</span><b>${a}<small>/ ${n}</small></b>${meter(a, n, c)}</div>`;
   $('#dTiles').innerHTML = `<div class="tile"><span>Slot liputan</span><b>${t.n}</b><span style="font-weight:500">${t.n - base.filter(e => e.k === 'prep').length} perlawanan/majlis</span></div>`
-    + tile('Ada petugas', t.a, t.n, '--c-crew') + tile('Gambar di Drive', t.dr, t.n, '--c-drive') + tile('Publisiti', t.pb, t.n, '--c-pub');
+    + tile('Ada petugas', t.a, t.n, '--c-crew') + tile('Gambar di Drive', t.dr, t.n, '--c-drive') + tile('Publisiti', t.pb, t.pn, '--c-pub');
   $('#dNotice').textContent = dbState === 'wait' ? 'Memuatkan status pasukan…' : dbState === 'err' ? 'Tidak dapat menghubungi pangkalan data — angka di bawah mungkin belum terkini.' : '';
   if (!st.day) {
     let h = '<h3>Ikut hari</h3><p>Pilih hari di bar atas untuk melihat dashboard hari itu sahaja.</p><div class="dayrows"><div class="dr hdr"><span>Hari</span><span>Ada petugas</span><span>Gambar di Drive</span><span>Publisiti</span></div>';
     for (let d = 1; d <= 5; d++) {
       const r = tally(base.filter(e => e.d === d));
-      const m = (lbl, a, c) => `<div class="m" data-l="${lbl}"><b>${a}/${r.n}</b>${meter(a, r.n, c)}</div>`;
-      h += `<div class="dr"><span class="dn" style="--dc:var(--d${d})">${DAYS[d].h} ${d} Dis</span>${m('Ada petugas', r.a, '--c-crew')}${m('Gambar di Drive', r.dr, '--c-drive')}${m('Publisiti', r.pb, '--c-pub')}</div>`;
+      const m = (lbl, a, c, den = r.n) => `<div class="m" data-l="${lbl}"><b>${a}/${den}</b>${meter(a, den, c)}</div>`;
+      h += `<div class="dr"><span class="dn" style="--dc:var(--d${d})">${DAYS[d].h} ${d} Dis</span>${m('Ada petugas', r.a, '--c-crew')}${m('Gambar di Drive', r.dr, '--c-drive')}${m('Publisiti', r.pb, '--c-pub', r.pn)}</div>`;
     }
     $('#dDays').innerHTML = h + '</div>';
   } else $('#dDays').innerHTML = '';
@@ -681,8 +694,8 @@ function renderDash() {
     const list = base.filter(e => e.s === s); if (!list.length) return '';
     const r = tally(list), nx = nextFor(list), fin = list.filter(e => e.k === 'final' || e.k === 'award').pop();
     return `<div class="dc" style="--sc:${SC[s]}"><div class="hdr sp-h"><span class="dot"></span><div><h4>${esc(SP[s])}</h4><p class="vn">${[...new Set(list.map(e => e.v))].map(v => esc(VN[v])).join(' · ')}</p></div>${pair(s)}</div>
-<div class="big"><b>${r.n}</b><span>slot${r.nt ? ' · ' + r.nt + ' ada nota' : ''}</span></div>
-${br('Ada petugas', r.a, r.n, '--c-crew')}${br('Gambar di Drive', r.dr, r.n, '--c-drive')}${br('Publisiti', r.pb, r.n, '--c-pub')}
+<div class="big"><b>${r.n}</b><span>slot${r.pr ? ' · ' + r.pr + ' PRIORITY' : ''}${r.nt ? ' · ' + r.nt + ' ada nota' : ''}</span></div>
+${br('Ada petugas', r.a, r.n, '--c-crew')}${br('Gambar di Drive', r.dr, r.n, '--c-drive')}${br('Publisiti' + (r.np ? ` <small>(${r.np} tidak perlu)</small>` : ''), r.pb, r.pn, '--c-pub')}
 <div class="foot"><span>${fin ? 'Akhir/hadiah: ' + DAYS[fin.d].s + ' ' + fin.d + ' Dis ' + fin.t0 : nx ? 'Seterusnya: ' + DAYS[nx.d].s + ' ' + nx.d + ' Dis ' + nx.t0 : 'Selesai'}</span><button type="button" data-go-sport="${s}">Lihat jadual</button></div></div>`;
   }).join('') || '<p class="note">Tiada slot untuk hari ini.</p>';
   const ids = sortedP();
@@ -691,7 +704,7 @@ ${br('Ada petugas', r.a, r.n, '--c-crew')}${br('Gambar di Drive', r.dr, r.n, '--
     const per = [1, 2, 3, 4, 5].map(d => [d, list.filter(e => e.d === d).length]).filter(x => x[1]);
     return `<div class="dc"><div class="hdr">${av(p, 48)}<div><h4>${esc(p.nama || 'Petugas')}</h4><div class="role">${unitLine(p)}</div></div></div>
 <div class="big"><b>${r.n}</b><span>slot ditetapkan</span></div>
-${r.n ? br('Gambar di Drive', r.dr, r.n, '--c-drive') + br('Publisiti', r.pb, r.n, '--c-pub') : '<p class="note">Belum ditetapkan pada mana-mana slot' + (st.day ? ' hari ini' : '') + '.</p>'}
+${r.n ? br('Gambar di Drive', r.dr, r.n, '--c-drive') + br('Publisiti', r.pb, r.pn, '--c-pub') : '<p class="note">Belum ditetapkan pada mana-mana slot' + (st.day ? ' hari ini' : '') + '.</p>'}
 ${!st.day ? `<div class="avchips">${[1, 2, 3, 4, 5].map(d => { const v = availOf(id, d), n = list.filter(e => e.d === d).length; return `<span class="avs-${v || 'x'}" title="${esc(AVS[v])}">${DAYS[d].s} ${d}: ${n} slot</span>`; }).join('')}</div>` : `<div class="avchips"><span class="avs-${availOf(id, st.day) || 'x'}">${DAYS[st.day].s} ${st.day}: ${esc(AVS[availOf(id, st.day)])}</span></div>`}
 <div class="foot"><span>${nx ? 'Seterusnya: ' + DAYS[nx.d].s + ' ' + nx.t0 + ' · ' + esc(SP[nx.s]) : r.n ? 'Tiada slot akan datang' : ''}</span><button type="button" data-go-crew="${esc(id)}">Lihat jadual</button></div></div>`;
   }).join('') : `<div class="pc empty" style="grid-column:1/-1;min-height:140px"><b>Belum ada petugas</b><span style="font-size:14px">Dashboard setiap petugas akan muncul di sini selepas admin mengisi senarai di tab Petugas.</span></div>`;
@@ -765,6 +778,8 @@ function toggleItem(eid, k, on) {
   const val = on ? {by: me, at: nowStr()} : null;
   const cur = Object.assign({}, C[eid] || {}); cur.items = Object.assign({}, itemsOf(eid)); cur.items[k] = val; C[eid] = cur;
   refreshCard(eid);
+  if (on && k === 'publisiti' && itemsOf(eid).tiada_publisiti) setTimeout(() => toggleItem(eid, 'tiada_publisiti', false), 0);
+  if (on && k === 'tiada_publisiti' && itemsOf(eid).publisiti) setTimeout(() => toggleItem(eid, 'publisiti', false), 0);
   pending++;
   api({a: 'tick', pin, slot: eid, key: k, on, by: me, label: label(e)})
     .then(() => { pending--; rev = ''; pull(); })
@@ -944,7 +959,7 @@ function summary() {
   list.forEach(e => {
     if (e.d !== d0) { out += `\n\n*${DAYS[e.d].h.toUpperCase()}, ${e.d} DIS 2026*`; d0 = e.d; }
     const crew = crewOf(e.id).map(p => P[p].nama).filter(Boolean);
-    out += `\n${e.t0}–${e.t1} | ${SP[e.s]}${e.no ? ' ' + e.no : ''}: ${e.ti} @ ${short(e.v)}${crew.length ? ' — ' + crew.join(', ') : ''}`;
+    out += `\n${itemsOf(e.id).priority ? '[PRIORITY] ' : ''}${e.t0}–${e.t1} | ${SP[e.s]}${e.no ? ' ' + e.no : ''}: ${e.ti} @ ${short(e.v)}${crew.length ? ' — ' + crew.join(', ') : ''}`;
   });
   return out + '\n\n' + location.href.split('#')[0];
 }
@@ -960,6 +975,7 @@ $('#sports').addEventListener('click', ev => {
 });
 $('#fCrew').addEventListener('change', ev => { st.crew = ev.target.value; persist(); renderList(); });
 $('#fPrep').addEventListener('change', ev => { st.hidePrep = ev.target.checked; persist(); renderList(); });
+$('#fPrio').addEventListener('change', ev => { st.prio = ev.target.checked; persist(); renderList(); });
 $('#meBtn').addEventListener('click', () => askMe(null));
 $('#adminBtn').addEventListener('click', openPin);
 $('#fMe').addEventListener('submit', saveMe);
@@ -1039,6 +1055,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) pull
 
 /* ---------- boot ---------- */
 $('#fPrep').checked = st.hidePrep;
+$('#fPrio').checked = st.prio;
 renderNow();
 showView();
 pull();

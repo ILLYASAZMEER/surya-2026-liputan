@@ -14,7 +14,7 @@ const ID_RE = /^[\w-]{1,40}$/;
 const HEADERS = {
   Petugas: ['id', 'nama', 'telefon', 'peranan', 'urutan', 'foto', 'avail', 'unit', 'kamera'],
   Tugasan: ['slot_id', 'slot', 'petugas_id', 'petugas_nama'],
-  Status: ['slot_id', 'slot', 'drive', 'drive_oleh', 'drive_masa', 'publisiti', 'publisiti_oleh', 'publisiti_masa', 'nota', 'nota_oleh', 'nota_masa']
+  Status: ['slot_id', 'slot', 'drive', 'drive_oleh', 'drive_masa', 'publisiti', 'publisiti_oleh', 'publisiti_masa', 'nota', 'nota_oleh', 'nota_masa', 'tiada_publisiti', 'tiada_publisiti_oleh', 'tiada_publisiti_masa', 'priority', 'priority_oleh', 'priority_masa']
 };
 
 function setup() {
@@ -93,7 +93,9 @@ function slotData_() {
     st[r.slot_id] = {
       drive: r.drive ? { by: r.drive_oleh, at: r.drive_masa } : null,
       publisiti: r.publisiti ? { by: r.publisiti_oleh, at: r.publisiti_masa } : null,
-      nota: r.nota ? { t: r.nota, by: r.nota_oleh, at: r.nota_masa } : null
+      nota: r.nota ? { t: r.nota, by: r.nota_oleh, at: r.nota_masa } : null,
+      tiada_publisiti: r.tiada_publisiti ? { by: r.tiada_publisiti_oleh, at: r.tiada_publisiti_masa } : null,
+      priority: r.priority ? { by: r.priority_oleh, at: r.priority_masa } : null
     };
   });
   return { tugasan: tug, status: st };
@@ -123,7 +125,8 @@ function checkPin_(pin) {
 function requirePin_(pin) { if (!checkPin_(pin)) throw new Error('pin'); }
 
 function tick_(b) {
-  if (!SLOT_RE.test(b.slot) || ['drive', 'publisiti'].indexOf(b.key) < 0) throw new Error('bad');
+  if (!SLOT_RE.test(b.slot) || ['drive', 'publisiti', 'tiada_publisiti', 'priority'].indexOf(b.key) < 0) throw new Error('bad');
+  ensureHeader_('Status');
   const o = { slot: str_(b.label, 200) };
   o[b.key] = b.on ? '✓' : '';
   o[b.key + '_oleh'] = b.on ? str_(b.by, 60) : '';
@@ -138,6 +141,11 @@ function nota_(b) {
   upsert_('Status', b.slot, { slot: str_(b.label, 200), nota: t, nota_oleh: t ? str_(b.by, 60) : '', nota_masa: t ? now_() : '' });
   bump_('REV');
   return { ok: true };
+}
+function ensureHeader_(name) {
+  const sh = sheet_(name), h = HEADERS[name];
+  const cur = sh.getRange(1, 1, 1, h.length).getValues()[0].map(String);
+  if (cur.join('|') !== h.join('|')) sh.getRange(1, 1, 1, h.length).setValues([h]).setFontWeight('bold');
 }
 function ensurePetugasHeader_() {
   const sh = sheet_('Petugas'), h = HEADERS.Petugas;
