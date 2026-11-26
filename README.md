@@ -8,6 +8,6 @@ Website jadual liputan untuk Pasukan Coverage, Media Sosial JKR Sarawak, sepanja
 - **Petugas (25 orang):** nama, unit, telefon, kamera, gambar dan ketersediaan 1–5 Dis, diisi oleh admin (perlu PIN) terus dalam jadual di tab Petugas. Semasa menetapkan tugasan, setiap petugas ditanda Available / Sebahagian masa / Tidak available dan diberi amaran jika bertembung.
 - **Status & nota** hanya boleh dikemas kini oleh admin.
 
-Sumber jadual: *SURYA_2026_Master_Game_Calendar V4 (latest)*. Data petugas dan status disimpan dalam Google Sheet *SURYA 2026 – Data Website Liputan* melalui Google Apps Script (`apps-script/Code.gs`, tanpa PIN).
+Sumber jadual: *SURYA_2026_Master_Game_Calendar V4 (latest)* — tab Ringkasan Kejohanan dan tab setiap sukan sahaja. Jika bercanggah, tab sukan diutamakan dan perbezaan dicatat pada kad slot. Data petugas dan status disimpan dalam Google Sheet *SURYA 2026 – Data Website Liputan* melalui Google Apps Script (`apps-script/Code.gs`, tanpa PIN).
 
 Maskot: Mimi & Belang, SURYA 2026.
