@@ -213,6 +213,20 @@ dialog{border:1px solid var(--line);border-radius:20px;padding:0;background:var(
 .avb{display:inline-block;font-size:12.5px;font-weight:700;padding:2px 8px;border-radius:999px;margin-top:2px}
 .clash{display:block;font-size:12.5px;color:var(--d2);font-weight:600}
 .plist label>span:not(.av){flex:1}
+.ptab{min-width:1080px}
+.ptab td.no{background:none;color:var(--mut);font-weight:600;width:2em;text-align:right;padding-right:2px}
+.ptab td.nm{min-width:15em;white-space:normal;position:sticky;left:0;background:var(--bg);z-index:1}
+.ptab th:nth-child(2){left:0;z-index:2}
+@media (max-width:600px){.ptab td.no,.ptab th:first-child{display:none}.ptab td.nm{min-width:11em}}
+.ptab td.nm small{display:block}
+.ptab td.nm .lnk{min-height:30px;margin-top:4px;font-size:12.5px}
+.ptab td.tf{background:none;padding:4px 2px;min-width:9em}
+.ptab td.tf input{min-height:40px;font-size:15px;padding:0 10px}
+.ptab td:nth-child(4){min-width:13em}
+.ptab select{min-height:36px;font-size:15px;width:100%;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:0 6px;font-weight:600}
+.ptab th{position:sticky;top:0;background:var(--bg)}
+.saved{color:var(--ok);font-weight:600}
+.pc .cam{margin:0;font-size:14px}
 dialog::backdrop{background:rgb(20 8 10/.55)}
 dialog form{padding:22px;display:grid;gap:14px}
 dialog h2{margin:0;font:700 20px/1.2 var(--hf)}
@@ -322,8 +336,9 @@ footer ul{margin:6px 0 0;padding-left:20px}
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="adminBtn" type="button">Mod admin</button><button class="pri" id="addP" type="button" hidden>Tambah petugas</button></div>
    </div>
    <div class="notice" id="pNotice"></div>
-   <div class="pgrid" id="pgrid" style="margin-top:14px"></div>
-   <div class="dsec" id="pAvail"></div>
+   <div class="dsec" id="pAvail" style="margin-top:8px"></div>
+   <div class="dsec"><h3 id="pCardsH">Kad petugas</h3></div>
+   <div class="pgrid" id="pgrid" style="margin-top:12px"></div>
   </div>
  </section>
 </main>
@@ -360,8 +375,11 @@ footer ul{margin:6px 0 0;padding-left:20px}
  <div class="upl"><span id="fPprev"></span><label class="btn" style="display:inline-flex;align-items:center;font-weight:600">Pilih gambar<input type="file" id="fPfile" accept="image/*" hidden></label></div>
  <label>Nama penuh<input id="fPnama" required maxlength="80" autocomplete="off"></label>
  <label>No. telefon<input id="fPtel" type="tel" inputmode="tel" maxlength="20" placeholder="012-345 6789" autocomplete="off"></label>
+ <label>Unit / bahagian<input id="fPunit" maxlength="80" list="unitList" placeholder="cth. Komunikasi Korporat" autocomplete="off"></label>
+ <datalist id="unitList"><option value="Komunikasi Korporat"><option value="Kejuruteraan Bangunan dan Struktur"><option value="Jambatan dan Struktur Sungai"><option value="Sumber Manusia"><option value="Penyelidikan dan Siasatan"><option value="Audit"><option value="JKR Bahagian Kuching"><option value="JKR Bahagian Samarahan"><option value="JKR Bahagian Miri"><option value="JKR Bahagian Sarikei"><option value="JKR Bahagian Mukah"><option value="JKR Bahagian Betong"><option value="JKR Bahagian Bintulu"><option value="JKR Bahagian Limbang"></datalist>
+ <label>Kamera / peralatan<input id="fPkam" maxlength="120" placeholder="cth. Sony A7 IV + 24-70mm" autocomplete="off"></label>
  <label>Peranan<select id="fProle">
-  <option>Jurugambar</option><option>Jurukamera video</option><option>Penulis berita</option><option>Operator drone</option><option>Media sosial / posting</option><option>Penyelaras liputan</option><option>Lain-lain</option>
+  <option value="">— Belum ditetapkan —</option><option>Jurugambar</option><option>Jurukamera video</option><option>Penulis berita</option><option>Operator drone</option><option>Media sosial / posting</option><option>Penyelaras liputan</option><option>Lain-lain</option>
  </select></label>
  <fieldset class="avf"><legend>Ketersediaan 1–5 Disember</legend><div id="fPavail"></div></fieldset>
  <p class="err" id="fPerr"></p>
@@ -440,7 +458,7 @@ const st = {day: liveDay() || (Number.isInteger(saved.day) ? saved.day : 1), spo
 const open = new Set(), drafts = {};
 let P = {}, T = {}, C = {};
 let me = store.get('me', '') || '', pin = store.get('pin', '') || '';
-let isAdmin = !!pin, dbState = 'wait', rev = '', prev = '', pending = 0;
+let isAdmin = !!pin, dbState = 'wait', rev = '', prev = '', pending = 0, pPending = 0;
 
 /* ---------- api ---------- */
 async function api(body) {
@@ -456,7 +474,7 @@ async function pull() {
     const r = await fetch(`${API}?a=all&rev=${encodeURIComponent(rev)}&prev=${encodeURIComponent(prev)}&t=${Date.now()}`);
     const j = await r.json();
     if (!j.ok) throw new Error(j.err || 'gagal');
-    if (j.petugas) { const o = {}; j.petugas.forEach(p => { if (p && p.id) o[p.id] = p; }); P = o; prev = j.prev; }
+    if (j.petugas && !pPending) { const o = {}; j.petugas.forEach(p => { if (p && p.id) o[p.id] = p; }); P = o; prev = j.prev; }
     if (j.tugasan && !pending) {
       T = j.tugasan || {};
       const o = {};
@@ -497,6 +515,7 @@ function clashes(pid, e) {
   const a = mins(e.t0), b = mins(e.t1);
   return EV.filter(o => o.id !== e.id && o.d === e.d && mins(o.t0) < b && a < mins(o.t1) && crewOf(o.id).includes(pid));
 }
+const unitLine = p => [p.unit, p.peranan].filter(Boolean).map(esc).join(' · ');
 const sortedP = () => Object.keys(P).sort((a, b) => (P[a].urutan || 0) - (P[b].urutan || 0) || String(P[a].nama).localeCompare(String(P[b].nama)));
 function waLink(tel) {
   let d = String(tel || '').replace(/\D/g, '');
@@ -598,13 +617,13 @@ function ckHtml(e, it, nota) {
     const v = it[k];
     return `<li><label><input type="checkbox" data-k="${k}"${v ? ' checked' : ''}${dis}><i>${i + 1}</i><span>${esc(l)}</span></label>${v ? `<small>✓ ${esc(v.by || 'Ahli pasukan')}${v.at ? ' · ' + esc(v.at) : ''}</small>` : ''}</li>`;
   }).join('')}</ul>
-<label class="nota"><span><i>3</i>Nota</span><textarea data-note maxlength="2000" placeholder="${ro ? 'Tiada nota' : 'Contoh: link folder Drive, keputusan perlawanan, nama VIP, isu di lapangan'}"${ro ? ' readonly' : ''}>${esc(txt)}</textarea><small data-nstat>${nota && nota.at ? 'Dikemas kini oleh ' + esc(nota.by || 'ahli pasukan') + ' · ' + esc(nota.at) : ''}</small></label></div>`;
+<label class="nota"><span><i>3</i>Nota</span><textarea data-note data-keep="n-${e.id}" maxlength="2000" placeholder="${ro ? 'Tiada nota' : 'Contoh: link folder Drive, keputusan perlawanan, nama VIP, isu di lapangan'}"${ro ? ' readonly' : ''}>${esc(txt)}</textarea><small data-nstat>${nota && nota.at ? 'Dikemas kini oleh ' + esc(nota.by || 'ahli pasukan') + ' · ' + esc(nota.at) : ''}</small></label></div>`;
 }
 function keepFocus(fn) {
-  const a = document.activeElement, ta = a && a.matches && a.matches('textarea[data-note]') ? a : null;
-  const id = ta ? ta.closest('.ev').dataset.id : null, sel = ta ? [ta.selectionStart, ta.selectionEnd] : null;
+  const a = document.activeElement, key = a && a.dataset ? a.dataset.keep : null;
+  let sel = null; try { if (key && typeof a.selectionStart === 'number') sel = [a.selectionStart, a.selectionEnd]; } catch (e) {}
   fn();
-  if (id) { const t = document.querySelector(`.ev[data-id="${id}"] textarea[data-note]`); if (t && t !== ta) { t.focus(); try { t.setSelectionRange(sel[0], sel[1]); } catch (e) {} } }
+  if (key) { const t = document.querySelector(`[data-keep="${CSS.escape(key)}"]`); if (t && t !== a) { t.focus(); if (sel) try { t.setSelectionRange(sel[0], sel[1]); } catch (e) {} } }
 }
 function renderList() {
   if (view() !== 'jadual') return;
@@ -670,7 +689,7 @@ ${br('Ada petugas', r.a, r.n, '--c-crew')}${br('Gambar di Drive', r.dr, r.n, '--
   $('#dCrew').innerHTML = ids.length ? ids.map(id => {
     const p = P[id], list = base.filter(e => crewOf(e.id).includes(id)), r = tally(list), nx = nextFor(list);
     const per = [1, 2, 3, 4, 5].map(d => [d, list.filter(e => e.d === d).length]).filter(x => x[1]);
-    return `<div class="dc"><div class="hdr">${av(p, 48)}<div><h4>${esc(p.nama || 'Petugas')}</h4><div class="role">${esc(p.peranan || '')}</div></div></div>
+    return `<div class="dc"><div class="hdr">${av(p, 48)}<div><h4>${esc(p.nama || 'Petugas')}</h4><div class="role">${unitLine(p)}</div></div></div>
 <div class="big"><b>${r.n}</b><span>slot ditetapkan</span></div>
 ${r.n ? br('Gambar di Drive', r.dr, r.n, '--c-drive') + br('Publisiti', r.pb, r.n, '--c-pub') : '<p class="note">Belum ditetapkan pada mana-mana slot' + (st.day ? ' hari ini' : '') + '.</p>'}
 ${!st.day ? `<div class="avchips">${[1, 2, 3, 4, 5].map(d => { const v = availOf(id, d), n = list.filter(e => e.d === d).length; return `<span class="avs-${v || 'x'}" title="${esc(AVS[v])}">${DAYS[d].s} ${d}: ${n} slot</span>`; }).join('')}</div>` : `<div class="avchips"><span class="avs-${availOf(id, st.day) || 'x'}">${DAYS[st.day].s} ${st.day}: ${esc(AVS[availOf(id, st.day)])}</span></div>`}
@@ -679,20 +698,37 @@ ${!st.day ? `<div class="avchips">${[1, 2, 3, 4, 5].map(d => { const v = availOf
 }
 
 /* ---------- crew view ---------- */
+function crewTable(ids) {
+  const days = [1, 2, 3, 4, 5];
+  const opt = v => [['', '—'], ['ada', 'Ada'], ['pagi', 'Pagi'], ['petang', 'Ptg/mlm'], ['tiada', 'Tiada']].map(([k, l]) => `<option value="${k}"${k === v ? ' selected' : ''}>${l}</option>`).join('');
+  const rows = ids.map((id, i) => {
+    const p = P[id];
+    const cells = days.map(d => {
+      const v = availOf(id, d), n = EV.filter(e => e.d === d && crewOf(e.id).includes(id)).length, sub = `<small>${n ? n + ' slot' : 'tiada slot'}</small>`;
+      return isAdmin ? `<td class="avs-${v || 'x'}"><select data-avp="${esc(id)}" data-d="${d}" data-keep="a-${esc(id)}-${d}" aria-label="${esc(p.nama)} ${DAYS[d].h} ${d} Dis">${opt(v)}</select>${sub}</td>` : `<td class="avs-${v || 'x'}">${AVS[v]}${sub}</td>`;
+    }).join('');
+    const inp = (f, ph, max) => isAdmin ? `<input data-pf="${f}" data-p="${esc(id)}" data-keep="${f}-${esc(id)}" value="${esc(p[f] || '')}" maxlength="${max}" placeholder="${ph}" aria-label="${f} ${esc(p.nama)}">` : (p[f] ? esc(p[f]) : '<span style="color:var(--mut)">—</span>');
+    return `<tr><td class="no">${i + 1}</td><td class="nm"><b>${esc(p.nama || 'Petugas')}</b><small>${unitLine(p) || '&nbsp;'}</small>${isAdmin ? `<button class="lnk" type="button" data-act="editp" data-p="${esc(id)}">Sunting</button>` : ''}</td><td class="tf">${inp('telefon', '01x-xxx xxxx', 20)}</td><td class="tf">${inp('kamera', 'cth. Sony A7 IV + 24-70mm', 120)}</td>${cells}</tr>`;
+  }).join('');
+  return `<h3>Senarai petugas: telefon, kamera &amp; ketersediaan</h3><p>${isAdmin ? 'Isi terus dalam jadual ini — setiap perubahan disimpan sendiri ke Google Sheet. Ketersediaan: Ada = sepanjang hari, Pagi = sebelum 1 ptg, Ptg/mlm = 1 ptg ke atas.' : 'Ketersediaan setiap petugas dan bilangan slot yang sudah ditetapkan setiap hari. Admin boleh mengemas kini dalam mod admin.'} <span id="ptSaved" class="saved">${esc(ptSavedText)}</span></p><div class="scroll"><table class="avtab ptab"><thead><tr><th>#</th><th>Petugas</th><th>Telefon</th><th>Kamera</th>${days.map(d => `<th>${DAYS[d].s} ${d} Dis</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
 function renderCrew() {
   if (view() !== 'petugas') return;
   const ids = sortedP();
   let h = ids.map(id => {
     const p = P[id], n = EV.filter(e => crewOf(e.id).includes(id)).length, wa = waLink(p.telefon);
-    return `<div class="pc"><div class="who">${av(p, 64)}<div><h3>${esc(p.nama || 'Petugas')}</h3><div class="role">${esc(p.peranan || '')}</div></div></div>
+    return `<div class="pc"><div class="who">${av(p, 64)}<div><h3>${esc(p.nama || 'Petugas')}</h3><div class="role">${unitLine(p)}</div></div></div>
 <p class="tel">${p.telefon ? esc(p.telefon) : '<span style="color:var(--mut)">Tiada no. telefon</span>'}</p>
+<p class="cam">Kamera: ${p.kamera ? `<b>${esc(p.kamera)}</b>` : '<span style="color:var(--mut)">belum diisi</span>'}</p>
 <div class="avchips">${[1, 2, 3, 4, 5].map(d => { const v = availOf(id, d); return `<span class="avs-${v || 'x'}">${DAYS[d].s} ${d}: ${AVS[v]}</span>`; }).join('')}</div>
 <div class="acts">${wa ? `<a href="${wa}" target="_blank" rel="noopener">WhatsApp</a>` : ''}<button type="button" data-act="view" data-p="${esc(id)}">Lihat tugasan (${n})</button>${isAdmin ? `<button type="button" data-act="editp" data-p="${esc(id)}">Sunting</button>` : ''}</div></div>`;
   }).join('');
-  const empties = Math.max(0, 6 - ids.length);
+  const empties = ids.length ? 0 : 6;
   for (let i = 0; i < empties; i++) h += `<div class="pc empty"><span class="sil"></span><b>Slot petugas kosong</b>${isAdmin ? '<button class="btn" type="button" data-act="newp">Isi slot ini</button>' : '<span style="font-size:14px">Akan diisi oleh admin</span>'}</div>`;
-  $('#pgrid').innerHTML = h;
-  $('#pAvail').innerHTML = ids.length ? `<h3>Ketersediaan petugas</h3><p>Ringkasan setiap hari: status ketersediaan dan bilangan slot yang sudah ditetapkan. Kemas kini melalui butang Sunting${isAdmin ? '' : ' (mod admin)'}.</p><div class="scroll"><table class="avtab"><thead><tr><th>Petugas</th>${[1, 2, 3, 4, 5].map(d => `<th>${DAYS[d].h} ${d}</th>`).join('')}</tr></thead><tbody>${ids.map(id => `<tr><td class="nm">${esc(P[id].nama || 'Petugas')}</td>${[1, 2, 3, 4, 5].map(d => { const v = availOf(id, d), n = EV.filter(e => e.d === d && crewOf(e.id).includes(id)).length; return `<td class="avs-${v || 'x'}">${AVS[v]}<small>${n ? n + ' slot' : 'tiada slot'}</small></td>`; }).join('')}</tr>`).join('')}</tbody></table></div>` : '';
+  keepFocus(() => {
+    $('#pgrid').innerHTML = h;
+    $('#pAvail').innerHTML = ids.length ? crewTable(ids) : '';
+  });
   $('#addP').hidden = !isAdmin;
   $('#adminBtn').textContent = isAdmin ? 'Mod admin: aktif' : 'Mod admin';
   $('#pNotice').textContent = dbState === 'wait' ? 'Memuatkan senarai petugas…' : dbState === 'err' ? 'Tidak dapat menghubungi pangkalan data. Senarai petugas akan muncul sebaik sambungan pulih.' : '';
@@ -757,6 +793,29 @@ function queueNote(eid, immediate) {
   if (immediate) run(); else noteTimers[eid] = setTimeout(run, 1500);
 }
 
+/* ---------- inline crew edits ---------- */
+const pTimers = {}, pQueue = {};
+let ptSavedText = '';
+function savedNote(t) { ptSavedText = t; const el = $('#ptSaved'); if (el) el.textContent = t; }
+function queuePSave(pid, delay) {
+  if (!isAdmin || !P[pid]) return;
+  if (!pTimers[pid]) pPending++;
+  clearTimeout(pTimers[pid]);
+  savedNote('Menyimpan…');
+  pTimers[pid] = setTimeout(() => {
+    delete pTimers[pid];
+    const p = P[pid];
+    const body = {id: pid, nama: p.nama, telefon: p.telefon || '', peranan: p.peranan || '', unit: p.unit || '', kamera: p.kamera || '', urutan: p.urutan || Date.now(), foto: '', keepFoto: true, avail: p.avail || ''};
+    pQueue[pid] = (pQueue[pid] || Promise.resolve()).then(() => api({a: 'savePetugas', pin, p: body}))
+      .then(() => { pPending--; if (!pPending) { savedNote('Disimpan ✓'); prev = ''; pull(); } })
+      .catch(err => { pPending--; savedNote(''); toast(failMsg(err)); });
+  }, delay);
+}
+function setAvail(pid, d, v) {
+  const o = parseAvail(P[pid].avail); if (v) o[d] = v; else delete o[d];
+  P[pid] = Object.assign({}, P[pid], {avail: Object.keys(o).sort().map(k => k + '=' + o[k]).join(';')});
+}
+
 /* ---------- dialogs ---------- */
 function openMe() {
   const ids = sortedP();
@@ -799,7 +858,9 @@ function openP(id) {
   const p = id ? P[id] : {};
   $('#fPh').textContent = id ? 'Sunting petugas' : 'Tambah petugas';
   $('#fPnama').value = p.nama || ''; $('#fPtel').value = p.telefon || '';
-  $('#fProle').value = p.peranan || 'Jurugambar';
+  $('#fProle').value = p.peranan || '';
+  $('#fPunit').value = p.unit || '';
+  $('#fPkam').value = p.kamera || '';
   const avl = parseAvail(p.avail);
   $('#fPavail').innerHTML = [1, 2, 3, 4, 5].map(d => `<label class="avr"><span>${DAYS[d].s} ${d} Dis</span><select data-d="${d}">${AVO.map(([v, l]) => `<option value="${v}"${(avl[d] || '') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></label>`).join('');
   $('#fPprev').innerHTML = av(p, 72);
@@ -827,7 +888,7 @@ async function saveP(ev) {
   try {
     const foto = pickedFile ? await shrink(pickedFile) : '';
     const avail = [...document.querySelectorAll('#fPavail select')].filter(x => x.value).map(x => x.dataset.d + '=' + x.value).join(';');
-    const body = {id: pid, nama, telefon: $('#fPtel').value.trim(), peranan: $('#fProle').value, urutan: prevP.urutan || Date.now(), foto, keepFoto: !pickedFile, avail};
+    const body = {id: pid, nama, telefon: $('#fPtel').value.trim(), peranan: $('#fProle').value, unit: $('#fPunit').value.trim(), kamera: $('#fPkam').value.trim(), urutan: prevP.urutan || Date.now(), foto, keepFoto: !pickedFile, avail};
     await api({a: 'savePetugas', pin, p: body});
     P[pid] = Object.assign({}, body, {foto: foto || prevP.foto || ''});
     $('#dP').close(); renderAll(); toast(editing ? 'Petugas dikemas kini' : 'Petugas ditambah');
@@ -854,7 +915,7 @@ function openA(eid) {
   $('#fAwhat').textContent = `${SP[e.s]} · ${e.ti} · ${DAYS[e.d].h} ${e.d} Dis, ${e.t0}–${e.t1}`;
   const rank = {ok: 0, x: 1, part: 2, no: 3};
   const rows = ids.map(id => ({id, f: fit(e, availOf(id, e.d)), c: clashes(id, e)})).sort((a, b) => (rank[a.f] + (a.c.length ? 0.5 : 0)) - (rank[b.f] + (b.c.length ? 0.5 : 0)));
-  $('#fAlist').innerHTML = ids.length ? rows.map(({id, f, c}) => `<label><input type="checkbox" value="${esc(id)}"${cur.includes(id) ? ' checked' : ''}>${av(P[id], 32)}<span><b>${esc(P[id].nama || 'Petugas')}</b> <span class="note">${esc(P[id].peranan || '')}</span><br><span class="avb ${FITL[f][1]}">${FITL[f][0]}${availOf(id, e.d) ? ' · ' + esc(AVS[availOf(id, e.d)]) : ''}</span>${c.length ? `<small class="clash">Bertembung: ${c.slice(0, 2).map(o => esc(SP[o.s] + ' ' + (o.no || '') + ' ' + o.t0 + '–' + o.t1)).join(', ')}${c.length > 2 ? ' +' + (c.length - 2) : ''}</small>` : ''}</span></label>`).join('') : '<p class="note">Belum ada petugas. Tambah petugas di tab Petugas dahulu.</p>';
+  $('#fAlist').innerHTML = ids.length ? rows.map(({id, f, c}) => `<label><input type="checkbox" value="${esc(id)}"${cur.includes(id) ? ' checked' : ''}>${av(P[id], 32)}<span><b>${esc(P[id].nama || 'Petugas')}</b> <span class="note">${unitLine(P[id])}${P[id].kamera ? ' · ' + esc(P[id].kamera) : ''}</span><br><span class="avb ${FITL[f][1]}">${FITL[f][0]}${availOf(id, e.d) ? ' · ' + esc(AVS[availOf(id, e.d)]) : ''}</span>${c.length ? `<small class="clash">Bertembung: ${c.slice(0, 2).map(o => esc(SP[o.s] + ' ' + (o.no || '') + ' ' + o.t0 + '–' + o.t1)).join(', ')}${c.length > 2 ? ' +' + (c.length - 2) : ''}</small>` : ''}</span></label>`).join('') : '<p class="note">Belum ada petugas. Tambah petugas di tab Petugas dahulu.</p>';
   $('#fAall').checked = false;
   $('#fAallL').textContent = `Guna untuk semua ${same.length} slot ${SP[e.s]} pada ${DAYS[e.d].h} ${e.d} Dis`;
   $('#fAall').closest('label').hidden = same.length < 2 || !ids.length;
@@ -940,6 +1001,25 @@ $('#pgrid').addEventListener('click', ev => {
   else if (a === 'view') { st.crew = b.dataset.p; st.sport = ''; st.day = 0; persist(); location.hash = '#jadual'; }
 });
 $('#addP').addEventListener('click', () => openP(null));
+$('#pAvail').addEventListener('change', ev => {
+  const s2 = ev.target.closest('select[data-avp]'); if (!s2 || !isAdmin) return;
+  const pid = s2.dataset.avp; if (!P[pid]) return;
+  setAvail(pid, s2.dataset.d, s2.value); s2.closest('td').className = 'avs-' + (s2.value || 'x');
+  queuePSave(pid, 600);
+});
+$('#pAvail').addEventListener('input', ev => {
+  const i = ev.target.closest('input[data-pf]'); if (!i || !isAdmin) return;
+  const pid = i.dataset.p; if (!P[pid]) return;
+  P[pid] = Object.assign({}, P[pid], {[i.dataset.pf]: i.value});
+  queuePSave(pid, 1500);
+});
+$('#pAvail').addEventListener('focusout', ev => {
+  const i = ev.target.closest('input[data-pf]'); if (!i) return;
+  const pid = i.dataset.p; if (pTimers[pid]) queuePSave(pid, 0);
+});
+$('#pAvail').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-act=editp]'); if (b) openP(b.dataset.p);
+});
 $('#fPfile').addEventListener('change', ev => {
   const f = ev.target.files && ev.target.files[0]; if (!f) return;
   pickedFile = f;

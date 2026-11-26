@@ -12,7 +12,7 @@ const TZ = 'Asia/Kuching';
 const SLOT_RE = /^[\w-]{1,80}$/;
 const ID_RE = /^[\w-]{1,40}$/;
 const HEADERS = {
-  Petugas: ['id', 'nama', 'telefon', 'peranan', 'urutan', 'foto', 'avail'],
+  Petugas: ['id', 'nama', 'telefon', 'peranan', 'urutan', 'foto', 'avail', 'unit', 'kamera'],
   Tugasan: ['slot_id', 'slot', 'petugas_id', 'petugas_nama'],
   Status: ['slot_id', 'slot', 'drive', 'drive_oleh', 'drive_masa', 'publisiti', 'publisiti_oleh', 'publisiti_masa', 'nota', 'nota_oleh', 'nota_masa']
 };
@@ -83,7 +83,7 @@ function out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).set
 /* ---------------- read ---------------- */
 function petugasData_() {
   return rows_('Petugas').map(function (r) {
-    return { id: r.id, nama: r.nama, telefon: r.telefon, peranan: r.peranan, urutan: Number(r.urutan) || 0, foto: /^data:image\/(jpeg|png|webp);base64,/.test(r.foto) ? r.foto : '', avail: r.avail || '' };
+    return { id: r.id, nama: r.nama, telefon: r.telefon, peranan: r.peranan, urutan: Number(r.urutan) || 0, foto: /^data:image\/(jpeg|png|webp);base64,/.test(r.foto) ? r.foto : '', avail: r.avail || '', unit: r.unit || '', kamera: r.kamera || '' };
   });
 }
 function slotData_() {
@@ -139,17 +139,32 @@ function nota_(b) {
   bump_('REV');
   return { ok: true };
 }
-function savePetugas_(p) {
+function ensurePetugasHeader_() {
+  const sh = sheet_('Petugas'), h = HEADERS.Petugas;
+  const cur = sh.getRange(1, 1, 1, h.length).getValues()[0].map(String);
+  if (cur.join('|') !== h.join('|')) sh.getRange(1, 1, 1, h.length).setValues([h]).setFontWeight('bold');
+}
+function putPetugas_(p) {
   if (!p || !ID_RE.test(p.id)) throw new Error('bad');
   const foto = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(p.foto || '') && p.foto.length <= 48000 ? p.foto : '';
-  const keep = p.keepFoto ? (rows_('Petugas').filter(function (r) { return r.id === p.id; })[0] || {}).foto || '' : '';
+  const keep = !foto && p.keepFoto ? (rows_('Petugas').filter(function (r) { return r.id === p.id; })[0] || {}).foto || '' : '';
   const avail = /^([1-5]=(ada|pagi|petang|tiada)?;?){0,5}$/.test(p.avail || '') ? String(p.avail || '') : '';
-  const sh = sheet_('Petugas');
-  if (String(sh.getRange(1, 7).getValue()) !== 'avail') sh.getRange(1, 7).setValue('avail').setFontWeight('bold');
-  upsert_('Petugas', p.id, { nama: str_(p.nama, 80), telefon: str_(p.telefon, 20), peranan: str_(p.peranan, 40), urutan: String(Number(p.urutan) || Date.now()), foto: foto || keep, avail: avail });
+  upsert_('Petugas', p.id, { nama: str_(p.nama, 80), telefon: str_(p.telefon, 20), peranan: str_(p.peranan, 40), urutan: String(Number(p.urutan) || Date.now()), foto: foto || keep, avail: avail, unit: str_(p.unit, 80), kamera: str_(p.kamera, 120) });
+}
+function savePetugas_(p) {
+  ensurePetugasHeader_();
+  putPetugas_(p);
   relabel_();
   bump_('PREV'); bump_('REV');
   return { ok: true };
+}
+function bulkPetugas_(list) {
+  if (!Array.isArray(list) || list.length > 80) throw new Error('bad');
+  ensurePetugasHeader_();
+  list.forEach(putPetugas_);
+  relabel_();
+  bump_('PREV'); bump_('REV');
+  return { ok: true, n: list.length };
 }
 function delPetugas_(id) {
   if (!ID_RE.test(id)) throw new Error('bad');
@@ -203,6 +218,7 @@ function doPost(e) {
       case 'nota': requirePin_(b.pin); return out_(nota_(b));
       case 'pin': return out_({ ok: checkPin_(b.pin) });
       case 'savePetugas': requirePin_(b.pin); return out_(savePetugas_(b.p));
+      case 'bulkPetugas': requirePin_(b.pin); return out_(bulkPetugas_(b.list));
       case 'delPetugas': requirePin_(b.pin); return out_(delPetugas_(b.id));
       case 'assign': requirePin_(b.pin); return out_(assign_(b.slots, b.ids, b.labels));
     }
